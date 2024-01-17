@@ -110,7 +110,7 @@ fn read_input(app: &mut App) -> Result<()> {
                     key: Key::Char('s'),
                     ctrl: true,
                     ..
-                } => app.show_next_flashcard(),
+                } => save_flashcard(&app),
 
                 input => {
                     app.input_area.input(input);
@@ -200,4 +200,9 @@ fn display_in_main_window(maybe_msg: Option<&str>) -> Result<()> {
 fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     // app.init_input_area();
     frame.render_widget(app.input_area.widget(), rect)
+}
+
+fn save_flashcard(app: &App) {
+    //get the text from app
+    let txt = app.text().clone();
 }

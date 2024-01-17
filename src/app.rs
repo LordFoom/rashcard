@@ -50,6 +50,16 @@ impl App<'_> {
     pub fn flip_flashcard(&mut self) {
         self.set_state(State::FlipFlashcard);
     }
+
+    ///Return whatever text there is in the text_area
+    pub fn text(&self) -> String {
+        let mut full_text = String::new();
+        for line in self.input_area.lines() {
+            full_text.push_str(line);
+            full_text.push('\n');
+        }
+        full_text
+    }
 }
 
 pub fn init_input_area<'a>() -> TextArea<'a> {
@@ -70,5 +80,25 @@ impl Default for App<'_> {
             verbosity: 0,
             input_area: init_input_area(),
         }
+    }
+}
+
+mod test {
+    use super::*;
+
+    #[test]
+    pub fn test_text() {
+        let mut app = App::default();
+        let lines = vec![
+            "this is the first line",
+            "this is the second line",
+            "this is the third line",
+        ];
+        app.input_area = TextArea::from(lines);
+        let res = app.text();
+        assert_eq!(
+            "this is the first line\nthis is the second line\nthis is the third line\n",
+            res
+        );
     }
 }
