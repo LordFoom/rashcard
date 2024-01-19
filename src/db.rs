@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{Context, Result};
 use rusqlite::Connection;
 
@@ -18,3 +20,14 @@ pub fn init_table(conn: &Connection) -> Result<()> {
     )?;
     Ok(())
 }
+
+pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> {
+    conn.execute(
+        "INSERT INTO flashcard(title, body) values (?1, ?2)",
+        &[title, body],
+    )?;
+
+    Ok(())
+}
+
+mod test {}

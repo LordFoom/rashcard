@@ -202,7 +202,7 @@ fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     frame.render_widget(app.input_area.widget(), rect)
 }
 
-fn save_flashcard(app: &App) {
+fn save_flashcard(app: &App, db: &Database) {
     //get the text from app
     let txt = app.text().clone();
 }
