@@ -7,10 +7,12 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
+use db::default_connection;
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
+use rusqlite::Connection;
 use std::io::{stdout, Stdout};
 use std::time::Duration;
 use tracing::{info, instrument, Level};
@@ -51,7 +53,8 @@ fn main() -> Result<()> {
     let app = App::from_arguments(&args);
     init_logging(app.verbosity.clone());
     let mut terminal = setup_terminal().context("setup failed")?;
-    run(app, &mut terminal).context("failed running")?;
+    let conn = default_connection().context("failed to get sql connection")?;
+    run(app, &conn, &mut terminal).context("failed running")?;
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
     unsetup_terminal(&mut terminal).context("unsetup failed")
@@ -80,10 +83,14 @@ fn unsetup_terminal(term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()>
 }
 
 #[instrument]
-fn run(mut app: App, term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()> {
+fn run(
+    mut app: App,
+    conn: &Connection,
+    term: &mut Terminal<CrosstermBackend<Stdout>>,
+) -> Result<()> {
     loop {
         term.draw(|f| render_app(f, &mut app))?;
-        read_input(&mut app)?;
+        read_input(&mut app, conn)?;
         if !app.running {
             info!("Going down!");
             break;
@@ -92,7 +99,7 @@ fn run(mut app: App, term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()
     Ok(())
 }
 
-fn read_input(app: &mut App) -> Result<()> {
+fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
     if event::poll(Duration::from_millis(250)).context("event poll failed")? {
         match app.state {
             State::AddFlashcard => match event::read().context("event read failed")?.into() {
@@ -110,7 +117,7 @@ fn read_input(app: &mut App) -> Result<()> {
                     key: Key::Char('s'),
                     ctrl: true,
                     ..
-                } => save_flashcard(&app),
+                } => save_flashcard(&app, conn)?,
 
                 input => {
                     app.input_area.input(input);
@@ -202,7 +209,22 @@ fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     frame.render_widget(app.input_area.widget(), rect)
 }
 
-fn save_flashcard(app: &App, db: &Database) {
+fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
     //get the text from app
-    let txt = app.text().clone();
+    let lines: Vec<String> = app.input_area.clone().into_lines();
+    //got nothing? do nothing
+    if lines.len() < 1 {
+        return Ok(());
+    }
+    //we have at least one line
+    //top line is title
+    let title = lines.get(0).unwrap();
+    //
+    //everything else is body
+    let body = &lines[1..]
+        .iter()
+        .map(|line| format!("{}{}", line, "\n"))
+        .collect::<String>();
+
+    Ok(())
 }

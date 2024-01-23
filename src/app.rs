@@ -51,7 +51,8 @@ impl App<'_> {
         self.set_state(State::FlipFlashcard);
     }
 
-    ///Return whatever text there is in the text_area
+    ///Return whatever text there is in the text_area,
+    ///as a single string with newlines separating the lines.
     pub fn text(&self) -> String {
         let mut full_text = String::new();
         for line in self.input_area.lines() {
