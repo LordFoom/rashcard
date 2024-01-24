@@ -43,6 +43,10 @@ impl App<'_> {
         self.running = false;
     }
 
+    pub fn idle(&mut self) {
+        self.set_state(State::Idling);
+    }
+
     pub fn show_next_flashcard(&mut self) {
         self.set_state(State::ShowFlashcard);
     }

@@ -12,7 +12,7 @@ use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use std::io::{stdout, Stdout};
 use std::time::Duration;
 use tracing::{info, instrument, Level};
@@ -118,7 +118,11 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ctrl: true,
                     ..
                 } => save_flashcard(&app, conn)?,
-
+                Input {
+                    key: Key::Char('i'),
+                    ctrl: true,
+                    ..
+                } => app.idle(),
                 input => {
                     app.input_area.input(input);
                     ()
@@ -225,6 +229,12 @@ fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
         .iter()
         .map(|line| format!("{}{}", line, "\n"))
         .collect::<String>();
+
+    //now we stick it in the db
+    conn.execute(
+        "INSERT INTO flashcard(title,body) VALUES (?,?)",
+        params![title, body],
+    )?;
 
     Ok(())
 }
