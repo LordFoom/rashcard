@@ -7,7 +7,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
-use db::default_connection;
+use db::{default_connection, init_table};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
@@ -88,6 +88,8 @@ fn run(
     conn: &Connection,
     term: &mut Terminal<CrosstermBackend<Stdout>>,
 ) -> Result<()> {
+    //create the table if need be
+    init_table(&conn)?;
     loop {
         term.draw(|f| render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
@@ -230,11 +232,5 @@ fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
         .map(|line| format!("{}{}", line, "\n"))
         .collect::<String>();
 
-    //now we stick it in the db
-    conn.execute(
-        "INSERT INTO flashcard(title,body) VALUES (?,?)",
-        params![title, body],
-    )?;
-
-    Ok(())
+    db::save_flashcard(title, body, conn)
 }

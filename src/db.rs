@@ -11,7 +11,7 @@ pub fn default_connection() -> Result<Connection> {
 pub fn init_table(conn: &Connection) -> Result<()> {
     conn.execute(
         r"CREATE TABLE IF NOT EXISTS flashcard 
-                 (id INT PRIMARY KEY ASC,
+                 (id INTEGER PRIMARY KEY,
                   title TEXT,
                   body TEXT,
                   create_date TEXT DEFAULT CURRENT_TIMESTAMP,
