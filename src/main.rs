@@ -121,7 +121,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ..
                 } => save_flashcard(&app, conn)?,
                 Input {
-                    key: Key::Char('i'),
+                    key: Key::Char('j'),
                     ctrl: true,
                     ..
                 } => app.idle(),
