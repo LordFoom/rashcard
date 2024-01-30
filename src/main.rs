@@ -124,7 +124,13 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     key: Key::Char('j'),
                     ctrl: true,
                     ..
-                } => app.idle(),
+                } => {
+                    app.idle();
+                    while !app.input_area.is_empty() {
+                        app.input_area.move_cursor(tui_textarea::CursorMove::End);
+                        app.input_area.delete_line_by_head();
+                    }
+                }
                 input => {
                     app.input_area.input(input);
                     ()
@@ -135,7 +141,10 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
-                        KeyCode::Char('s') | KeyCode::Char('S') => app.show_next_flashcard(),
+                        KeyCode::Char('s') | KeyCode::Char('S') => {
+                            //set the state if need be
+                            app.show_next_flashcard()
+                        }
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         _ => info!("Go baby go go!"),
                     }
