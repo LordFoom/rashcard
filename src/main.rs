@@ -218,10 +218,48 @@ fn display_in_main_window(maybe_msg: Option<&str>) -> Result<()> {
     Ok(())
 }
 
+fn display_popup(msg: &str, f: &mut Frame) -> Result<()> {
+    let msg = Paragraph::new(msg).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::DarkGray)),
+    );
+
+    //TODO some kind of centered rect method
+    //
+    let rect = centered_rect(20, 20, f.size());
+    f.render_widget(msg, rect);
+    Ok(())
+}
+
 ///Will display the text area we keep in our app for just this occasion
 fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     // app.init_input_area();
     frame.render_widget(app.input_area.widget(), rect)
+}
+
+///Create a 'centered' rect using percentage
+fn centered_rect(h: u16, v: u16, rect: Rect) -> Rect {
+    //cut into 3 vertical rows
+    let layout = Layout::new()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage((100 - v) / 2),
+            Constraint::Percentage(v),
+            Constraint::Percentage((100 - v) / 2),
+        ])
+        .split(rect);
+
+    //now we split the middle vertical block into 3 columns
+    //and we return the middle column
+    Layout::new()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage((100 - h) / 2),
+            Constraint::Percentage(h),
+            Constraint::Percentage((100 - h) / 2),
+        ])
+        .split(layout[1])[1]
 }
 
 fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
@@ -242,4 +280,6 @@ fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
         .collect::<String>();
 
     db::save_flashcard(title, body, conn)
+
+    app.display_popup
 }

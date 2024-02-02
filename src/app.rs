@@ -12,11 +12,13 @@ pub enum State {
     ShowFlashcard,
     FlipFlashcard,
     AddFlashcard,
+    DisplaySavedPopup,
 }
 #[derive(Debug)]
 pub struct App<'a> {
     pub running: bool,
     pub state: State,
+    pub prior_state: State,
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
 }
@@ -26,16 +28,19 @@ impl App<'_> {
         Self {
             running: true,
             state: State::Idling,
+            prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
         }
     }
 
     fn set_state(&mut self, state: State) {
+        self.prior_state = self.state;
         self.state = state;
     }
 
     pub fn show_add_flashcard(&mut self) {
+        self.prior_state = self.state;
         self.set_state(State::AddFlashcard)
     }
 
@@ -44,15 +49,23 @@ impl App<'_> {
     }
 
     pub fn idle(&mut self) {
+        self.prior_state = self.state;
         self.set_state(State::Idling);
     }
 
     pub fn show_next_flashcard(&mut self) {
+        self.prior_state = self.state;
         self.set_state(State::ShowFlashcard);
     }
 
     pub fn flip_flashcard(&mut self) {
+        self.prior_state = self.state;
         self.set_state(State::FlipFlashcard);
+    }
+
+    pub fn display_saved_popup(& mut self) {
+        self.prior_state = self.state;
+        self.set_state(State::)
     }
 
     ///Return whatever text there is in the text_area,
