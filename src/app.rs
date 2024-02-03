@@ -6,7 +6,7 @@ use tui_textarea::TextArea;
 
 use crate::Args;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum State {
     Idling,
     ShowFlashcard,
@@ -32,6 +32,18 @@ impl App<'_> {
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
         }
+    }
+
+    pub fn display_saved_popup(&self) -> bool {
+        self.state == State::DisplaySavedPopup
+    }
+
+    ///Restores the state before the current one,
+    ///while making the current on the prior one
+    pub fn restore_prior_state(&mut self) {
+        let state = self.state;
+        self.state = self.prior_state;
+        self.prior_state = state;
     }
 
     fn set_state(&mut self, state: State) {
@@ -63,9 +75,9 @@ impl App<'_> {
         self.set_state(State::FlipFlashcard);
     }
 
-    pub fn display_saved_popup(& mut self) {
+    pub fn saved(&mut self) {
         self.prior_state = self.state;
-        self.set_state(State::)
+        self.set_state(State::DisplaySavedPopup);
     }
 
     ///Return whatever text there is in the text_area,
@@ -94,6 +106,7 @@ impl Default for App<'_> {
     fn default() -> Self {
         Self {
             running: true,
+            prior_state: State::Idling,
             state: State::Idling,
             verbosity: 0,
             input_area: init_input_area(),

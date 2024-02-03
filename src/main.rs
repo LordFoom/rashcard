@@ -13,8 +13,11 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph},
 };
 use rusqlite::{params, Connection};
-use std::io::{stdout, Stdout};
 use std::time::Duration;
+use std::{
+    io::{stdout, Stdout},
+    thread::sleep,
+};
 use tracing::{info, instrument, Level};
 use tui_textarea::{Input, Key};
 
@@ -186,6 +189,11 @@ fn render_app(frame: &mut Frame, app: &mut App) {
         app::State::ShowFlashcard => draw_placeholder(frame, main_display),
         app::State::FlipFlashcard => draw_placeholder(frame, main_display),
         app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
+        app::State::DisplaySavedPopup_ => {
+            draw_saved_popup(&mut frame);
+            app.restore_prior_state();
+            sleep(100);
+        }
     }
     //
     //
@@ -216,6 +224,10 @@ fn display_in_main_window(maybe_msg: Option<&str>) -> Result<()> {
     );
 
     Ok(())
+}
+
+fn draw_saved_popup(f: &mut Frame) -> Result<()> {
+    display_popup("Saved", f)
 }
 
 fn display_popup(msg: &str, f: &mut Frame) -> Result<()> {
@@ -279,7 +291,8 @@ fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
         .map(|line| format!("{}{}", line, "\n"))
         .collect::<String>();
 
-    db::save_flashcard(title, body, conn)
+    db::save_flashcard(title, body, conn);
 
-    app.display_popup
+    app.display_popup();
+    Ok(())
 }
