@@ -63,29 +63,26 @@ fn main() -> Result<()> {
     unsetup_terminal(&mut terminal).context("unsetup failed")
 }
 
-#[instrument]
 fn setup_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>> {
-    info!("Setting up terminal...");
+    // info!("Setting up terminal...");
     enable_raw_mode().context("failed to enable raw mode")?;
     let mut stdout = stdout();
     stdout
         .execute(EnterAlternateScreen)
         .context("unable to enter alternate screen")?;
     let term = Terminal::new(CrosstermBackend::new(stdout)).context("unable to setup terminal");
-    info!("Terminal setup");
+    // info!("Terminal setup");
     term
 }
 
-#[instrument]
 fn unsetup_terminal(term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()> {
-    info!("Unsetting up terminal...");
+    // info!("Unsetting up terminal...");
     disable_raw_mode().context("failed to disable raw mode")?;
     execute!(term.backend_mut(), LeaveAlternateScreen)
         .context("unable to return to main screen")?;
     term.show_cursor().context("unable to show cursor")
 }
 
-#[instrument]
 fn run(
     mut app: App,
     conn: &Connection,
@@ -97,7 +94,7 @@ fn run(
         term.draw(|f| render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
         if !app.running {
-            info!("Going down!");
+            // info!("Going down!");
             break;
         }
     }
@@ -122,7 +119,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     key: Key::Char('s'),
                     ctrl: true,
                     ..
-                } => save_flashcard(&app, conn)?,
+                } => save_flashcard(app, conn)?,
                 Input {
                     key: Key::Char('j'),
                     ctrl: true,
@@ -184,19 +181,19 @@ fn render_app(frame: &mut Frame, app: &mut App) {
     frame.render_widget(msg, rows[0]);
     let main_display = cols[0];
     //now we do the main panel
+
     match app.state {
         app::State::Idling => draw_placeholder(frame, main_display),
         app::State::ShowFlashcard => draw_placeholder(frame, main_display),
         app::State::FlipFlashcard => draw_placeholder(frame, main_display),
         app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
-        app::State::DisplaySavedPopup_ => {
-            draw_saved_popup(&mut frame);
-            app.restore_prior_state();
-            sleep(100);
+        app::State::DisplaySavedPopup => {
+            // info!("Saved! About to display the same");
+            //TODO overlay this on the text area
+            draw_saved_popup(frame).unwrap();
+            app.close_popup_if_it_is_time();
         }
     }
-    //
-    //
 }
 
 ///It's a placeholder
@@ -274,7 +271,9 @@ fn centered_rect(h: u16, v: u16, rect: Rect) -> Rect {
         .split(layout[1])[1]
 }
 
-fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
+#[instrument]
+fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    // println!("About to save the flash card");
     //get the text from app
     let lines: Vec<String> = app.input_area.clone().into_lines();
     //got nothing? do nothing
@@ -291,8 +290,8 @@ fn save_flashcard(app: &App, conn: &Connection) -> Result<()> {
         .map(|line| format!("{}{}", line, "\n"))
         .collect::<String>();
 
-    db::save_flashcard(title, body, conn);
+    db::save_flashcard(title, body, conn)?;
 
-    app.display_popup();
+    app.display_saved_popup();
     Ok(())
 }

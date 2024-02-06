@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use ratatui::{
     style::{Color, Style},
     widgets::{Block, Borders},
@@ -6,7 +8,7 @@ use tui_textarea::TextArea;
 
 use crate::Args;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum State {
     Idling,
     ShowFlashcard,
@@ -21,6 +23,7 @@ pub struct App<'a> {
     pub prior_state: State,
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
+    pub popup_time: Option<Instant>,
 }
 
 impl App<'_> {
@@ -31,11 +34,26 @@ impl App<'_> {
             prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
+            popup_time: None,
         }
     }
 
-    pub fn display_saved_popup(&self) -> bool {
-        self.state == State::DisplaySavedPopup
+    ///Sets up the app to show the saved popup
+    ///This can and should be generalized
+    pub fn display_saved_popup(&mut self) {
+        self.prior_state = self.state;
+        let now = Instant::now();
+        self.popup_time = Some(now);
+        self.state = State::DisplaySavedPopup;
+    }
+
+    pub fn close_popup_if_it_is_time(&mut self) {
+        if let Some(inst) = self.popup_time {
+            let time_since = inst.elapsed();
+            if time_since.as_secs() > 1 {
+                self.restore_prior_state();
+            }
+        }
     }
 
     ///Restores the state before the current one,
@@ -44,6 +62,7 @@ impl App<'_> {
         let state = self.state;
         self.state = self.prior_state;
         self.prior_state = state;
+        self.popup_time = None
     }
 
     fn set_state(&mut self, state: State) {
@@ -110,11 +129,13 @@ impl Default for App<'_> {
             state: State::Idling,
             verbosity: 0,
             input_area: init_input_area(),
+            popup_time: None,
         }
     }
 }
 
 mod test {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]

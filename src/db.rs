@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use anyhow::{Context, Result};
+use anyhow::Result;
 use rusqlite::Connection;
 
 pub fn default_connection() -> Result<Connection> {
