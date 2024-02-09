@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::State;
+use app::{update_flashcard, State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -7,7 +7,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
-use db::{default_connection, init_table};
+use db::default_connection;
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
@@ -141,10 +141,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
-                        KeyCode::Char('s') | KeyCode::Char('S') => {
-                            //set the state if need be
-                            app.show_next_flashcard()
-                        }
+                        KeyCode::Char('s') | KeyCode::Char('S') => show_next_flashcard(app, conn),
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         _ => info!("Go baby go go!"),
                     }
@@ -293,5 +290,24 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     db::save_flashcard(title, body, conn)?;
 
     app.display_saved_popup();
+    Ok(())
+}
+
+fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    //get the next flashcard
+    let offset = app.current_flashcard_number;
+    let txt = if let Some(flash) = db::next_flashcard(offset, conn)? {
+        //we'll append everything to the title and bring it back
+        let mut title = flash.title;
+        let body = flash.body;
+        title.push('\n');
+        title.push_str(&body);
+        &title
+    } else {
+        app.reset_count();
+        "No flashcards"
+    };
+
+    app.update_flashcard(txt);
     Ok(())
 }

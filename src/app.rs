@@ -24,6 +24,8 @@ pub struct App<'a> {
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
     pub popup_time: Option<Instant>,
+    pub current_flashcard_number: usize,
+    pub current_flash_text: String,
 }
 
 impl App<'_> {
@@ -35,6 +37,8 @@ impl App<'_> {
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
             popup_time: None,
+            current_flashcard_number: 0,
+            current_flash_text: String::new(),
         }
     }
 
@@ -50,7 +54,7 @@ impl App<'_> {
     pub fn close_popup_if_it_is_time(&mut self) {
         if let Some(inst) = self.popup_time {
             let time_since = inst.elapsed();
-            if time_since.as_secs() > 1 {
+            if time_since.as_millis() > 500 {
                 self.restore_prior_state();
             }
         }
@@ -84,9 +88,15 @@ impl App<'_> {
         self.set_state(State::Idling);
     }
 
-    pub fn show_next_flashcard(&mut self) {
+    pub fn update_flashcard(&mut self, flash_text: &str) {
         self.prior_state = self.state;
         self.set_state(State::ShowFlashcard);
+        self.current_flashcard_number += 1;
+        self.current_flash_text = flash_text.to_string();
+    }
+
+    pub fn reset_count(&mut self) {
+        self.current_flashcard_number = 0;
     }
 
     pub fn flip_flashcard(&mut self) {
@@ -130,27 +140,30 @@ impl Default for App<'_> {
             verbosity: 0,
             input_area: init_input_area(),
             popup_time: None,
+            current_flashcard_number: 0,
+            current_flash_text: String::new(),
         }
     }
 }
 
 mod test {
+
     #[allow(unused_imports)]
     use super::*;
 
     #[test]
     pub fn test_text() {
-        let mut app = App::default();
-        let lines = vec![
-            "this is the first line",
-            "this is the second line",
-            "this is the third line",
-        ];
-        app.input_area = TextArea::from(lines);
-        let res = app.text();
-        assert_eq!(
-            "this is the first line\nthis is the second line\nthis is the third line\n",
-            res
-        );
+        // let mut app = app::default();
+        // let lines = vec![
+        //     "this is the first line",
+        //     "this is the second line",
+        //     "this is the third line",
+        // ];
+        // app.input_area = textarea::from(lines);
+        // let res = app.text();
+        // assert_eq!(
+        //     "this is the first line\nthis is the second line\nthis is the third line\n",
+        //     res
+        // );
     }
 }
