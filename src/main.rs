@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::{update_flashcard, State};
+use app::{State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -12,16 +12,17 @@ use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
-use rusqlite::{params, Connection};
+use rusqlite::{Connection};
 use std::time::Duration;
 use std::{
     io::{stdout, Stdout},
-    thread::sleep,
 };
 use tracing::{info, instrument, Level};
 use tui_textarea::{Input, Key};
 
 use crate::app::App;
+use crate::db::init_table;
+
 mod app;
 mod db;
 
@@ -89,7 +90,7 @@ fn run(
     term: &mut Terminal<CrosstermBackend<Stdout>>,
 ) -> Result<()> {
     //create the table if need be
-    init_table(&conn)?;
+    init_table(conn)?;
     loop {
         term.draw(|f| render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
@@ -136,17 +137,18 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ()
                 }
             },
-            State::ShowFlashcard | _ => {
+            State::ShowFlashcard | State::Idling  => {
                 if let Event::Key(key) = event::read().context("event read failed")? {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
-                        KeyCode::Char('s') | KeyCode::Char('S') => show_next_flashcard(app, conn),
+                        KeyCode::Char('s') | KeyCode::Char('S') => show_next_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         _ => info!("Go baby go go!"),
                     }
                 }
             }
+            _ => {}
         }
     }
     Ok(())
@@ -274,18 +276,23 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     //get the text from app
     let lines: Vec<String> = app.input_area.clone().into_lines();
     //got nothing? do nothing
-    if lines.len() < 1 {
+    if lines.is_empty() {
         return Ok(());
     }
     //we have at least one line
     //top line is title
-    let title = lines.get(0).unwrap();
+    let title = lines.first().unwrap();
     //
     //everything else is body
-    let body = &lines[1..]
-        .iter()
-        .map(|line| format!("{}{}", line, "\n"))
-        .collect::<String>();
+    let body = &lines[1..].join("\n");
+        // .iter()
+        // // .fold(String::new(), |mut output, line|{
+        // //         let _ = write!(output, line);
+        // //     let _ = write!(output, "\n");
+        // //     output
+        // // })
+        // .map(|line| format!("{}{}", line, "\n"))
+        // .collect::<String>();
 
     db::save_flashcard(title, body, conn)?;
 
@@ -302,12 +309,12 @@ fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
         let body = flash.body;
         title.push('\n');
         title.push_str(&body);
-        &title
+        title
     } else {
         app.reset_count();
-        "No flashcards"
+        "No flashcards".to_owned()
     };
 
-    app.update_flashcard(txt);
+    app.update_flashcard(&txt);
     Ok(())
 }
