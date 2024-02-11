@@ -35,7 +35,7 @@ pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> 
 
 pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCard>> {
     let mut qry =
-        conn.prepare("SELECT title, body FROM flashcard ORDERY BY id LIMIT 1 OFFSET ?")?;
+        conn.prepare("SELECT title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
     let flashcards = qry.query_map(params![offset], |row| {
         Ok(FlashCard {
             title: row.get(0)?,

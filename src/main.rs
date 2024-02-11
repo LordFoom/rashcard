@@ -183,7 +183,7 @@ fn render_app(frame: &mut Frame, app: &mut App) {
 
     match app.state {
         app::State::Idling => draw_placeholder(frame, main_display),
-        app::State::ShowFlashcard => draw_placeholder(frame, main_display),
+        app::State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
         app::State::FlipFlashcard => draw_placeholder(frame, main_display),
         app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
         app::State::DisplaySavedPopup => {
@@ -244,6 +244,17 @@ fn display_popup(msg: &str, f: &mut Frame) -> Result<()> {
 fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     // app.init_input_area();
     frame.render_widget(app.input_area.widget(), rect)
+}
+
+fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
+    let text = &app.current_flash_text;
+    let msg = Paragraph::new(&text[..]).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::Cyan)),
+    );
+
+    frame.render_widget(msg, rect);
 }
 
 ///Create a 'centered' rect using percentage
