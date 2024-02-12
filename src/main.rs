@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::{State};
+use app::State;
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -12,11 +12,9 @@ use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
-use rusqlite::{Connection};
+use rusqlite::Connection;
+use std::io::{stdout, Stdout};
 use std::time::Duration;
-use std::{
-    io::{stdout, Stdout},
-};
 use tracing::{info, instrument, Level};
 use tui_textarea::{Input, Key};
 
@@ -137,7 +135,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ()
                 }
             },
-            State::ShowFlashcard | State::Idling  => {
+            State::ShowNextFlashcard | State::Idling => {
                 if let Event::Key(key) = event::read().context("event read failed")? {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
@@ -169,7 +167,7 @@ fn render_app(frame: &mut Frame, app: &mut App) {
     //render the top message
     let msg = Paragraph::new(
         "Welcome to Rashcard, the Rust Flashcard application
-         [S]how [A]dd [Q]uit",
+         [N]ext | [P]revious | [A]dd | [Q]uit",
     )
     .block(
         Block::default()
@@ -183,8 +181,8 @@ fn render_app(frame: &mut Frame, app: &mut App) {
 
     match app.state {
         app::State::Idling => draw_placeholder(frame, main_display),
-        app::State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
-        app::State::FlipFlashcard => draw_placeholder(frame, main_display),
+        app::State::ShowNextFlashcard => display_current_flashcard(frame, main_display, app),
+        app::State::ShowPreviousFlashcard => draw_placeholder(frame, main_display),
         app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
         app::State::DisplaySavedPopup => {
             // info!("Saved! About to display the same");
@@ -296,14 +294,14 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     //
     //everything else is body
     let body = &lines[1..].join("\n");
-        // .iter()
-        // // .fold(String::new(), |mut output, line|{
-        // //         let _ = write!(output, line);
-        // //     let _ = write!(output, "\n");
-        // //     output
-        // // })
-        // .map(|line| format!("{}{}", line, "\n"))
-        // .collect::<String>();
+    // .iter()
+    // // .fold(String::new(), |mut output, line|{
+    // //         let _ = write!(output, line);
+    // //     let _ = write!(output, "\n");
+    // //     output
+    // // })
+    // .map(|line| format!("{}{}", line, "\n"))
+    // .collect::<String>();
 
     db::save_flashcard(title, body, conn)?;
 
@@ -312,20 +310,23 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    app.show_flash_card();
     //get the next flashcard
     let offset = app.current_flashcard_number;
     let txt = if let Some(flash) = db::next_flashcard(offset, conn)? {
         //we'll append everything to the title and bring it back
-        let mut title = flash.title;
+        let mut text = flash.title;
         let body = flash.body;
-        title.push('\n');
-        title.push_str(&body);
-        title
+        text.push('\n');
+        text.push_str(&body);
+        app.increment_flash_count();
+        //move onto the next flashcard
+        text
     } else {
         app.reset_count();
         "No flashcards".to_owned()
     };
 
-    app.update_flashcard(&txt);
+    app.update_flash_text(&txt);
     Ok(())
 }

@@ -11,8 +11,8 @@ use crate::Args;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum State {
     Idling,
-    ShowFlashcard,
-    FlipFlashcard,
+    ShowNextFlashcard,
+    ShowPreviousFlashcard,
     AddFlashcard,
     DisplaySavedPopup,
 }
@@ -70,12 +70,13 @@ impl App<'_> {
     }
 
     fn set_state(&mut self, state: State) {
-        self.prior_state = self.state;
-        self.state = state;
+        if self.state != state {
+            self.prior_state = self.state;
+            self.state = state;
+        }
     }
 
     pub fn show_add_flashcard(&mut self) {
-        self.prior_state = self.state;
         self.set_state(State::AddFlashcard)
     }
 
@@ -84,15 +85,18 @@ impl App<'_> {
     }
 
     pub fn idle(&mut self) {
-        self.prior_state = self.state;
         self.set_state(State::Idling);
     }
 
-    pub fn update_flashcard(&mut self, flash_text: &str) {
-        self.prior_state = self.state;
-        self.set_state(State::ShowFlashcard);
-        self.current_flashcard_number += 1;
+    pub fn update_flash_text(&mut self, flash_text: &str) {
         self.current_flash_text = flash_text.to_string();
+    }
+    pub fn increment_flash_count(&mut self) {
+        self.current_flashcard_number += 1;
+    }
+
+    pub fn show_flash_card(&mut self) {
+        self.set_state(State::ShowNextFlashcard);
     }
 
     pub fn reset_count(&mut self) {
@@ -100,12 +104,10 @@ impl App<'_> {
     }
 
     pub fn flip_flashcard(&mut self) {
-        self.prior_state = self.state;
-        self.set_state(State::FlipFlashcard);
+        self.set_state(State::ShowPreviousFlashcard);
     }
 
     pub fn saved(&mut self) {
-        self.prior_state = self.state;
         self.set_state(State::DisplaySavedPopup);
     }
 
