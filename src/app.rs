@@ -11,10 +11,14 @@ use crate::Args;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum State {
     Idling,
-    ShowNextFlashcard,
-    ShowPreviousFlashcard,
+    ShowFlashcard,
     AddFlashcard,
     DisplaySavedPopup,
+}
+pub enum Select {
+    Prev,
+    Next,
+    Random,
 }
 #[derive(Debug)]
 pub struct App<'a> {
@@ -91,12 +95,18 @@ impl App<'_> {
     pub fn update_flash_text(&mut self, flash_text: &str) {
         self.current_flash_text = flash_text.to_string();
     }
+
     pub fn increment_flash_count(&mut self) {
         self.current_flashcard_number += 1;
     }
 
+    pub fn decrement_flash_count(&mut self) {
+        //TODO we need to put in 0 bound check here
+        self.current_flashcard_number -= 1;
+    }
+
     pub fn show_flash_card(&mut self) {
-        self.set_state(State::ShowNextFlashcard);
+        self.set_state(State::ShowFlashcard);
     }
 
     pub fn reset_count(&mut self) {
@@ -104,7 +114,7 @@ impl App<'_> {
     }
 
     pub fn flip_flashcard(&mut self) {
-        self.set_state(State::ShowPreviousFlashcard);
+        self.set_state(State::ShowFlashcard);
     }
 
     pub fn saved(&mut self) {

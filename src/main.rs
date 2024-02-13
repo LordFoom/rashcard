@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::State;
+use app::{Select, State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -135,12 +135,13 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ()
                 }
             },
-            State::ShowNextFlashcard | State::Idling => {
+            State::ShowFlashcard | State::Idling => {
                 if let Event::Key(key) = event::read().context("event read failed")? {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
-                        KeyCode::Char('s') | KeyCode::Char('S') => show_next_flashcard(app, conn)?,
+                        KeyCode::Char('n') | KeyCode::Char('N') => show_next_flashcard(app, conn)?,
+                        KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         _ => info!("Go baby go go!"),
                     }
@@ -181,8 +182,7 @@ fn render_app(frame: &mut Frame, app: &mut App) {
 
     match app.state {
         app::State::Idling => draw_placeholder(frame, main_display),
-        app::State::ShowNextFlashcard => display_current_flashcard(frame, main_display, app),
-        app::State::ShowPreviousFlashcard => draw_placeholder(frame, main_display),
+        app::State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
         app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
         app::State::DisplaySavedPopup => {
             // info!("Saved! About to display the same");
@@ -310,6 +310,14 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    show_flashcard(app, conn, Select::Next)
+}
+
+fn show_prev_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    show_flashcard(app, conn, Select::Prev)
+}
+
+fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()> {
     app.show_flash_card();
     //get the next flashcard
     let offset = app.current_flashcard_number;
@@ -319,7 +327,11 @@ fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
         let body = flash.body;
         text.push('\n');
         text.push_str(&body);
-        app.increment_flash_count();
+        match state {
+            Select::Next => app.increment_flash_count(),
+            Select::Prev => app.decrement_flash_count(),
+            Select::Random => panic!("How did we get here? Random not yet supported"),
+        }
         //move onto the next flashcard
         text
     } else {
