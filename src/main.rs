@@ -7,14 +7,17 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
-use db::default_connection;
+use db::{default_connection, fetch_initial_flash_card_count};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
 use rusqlite::Connection;
-use std::io::{stdout, Stdout};
 use std::time::Duration;
+use std::{
+    fs::File,
+    io::{stdout, Stdout},
+};
 use tracing::{info, instrument, Level};
 use tui_textarea::{Input, Key};
 
@@ -45,11 +48,13 @@ fn init_logging(level: u8) {
         2 => Level::DEBUG, //wobble
         _ => Level::TRACE, //you are the crazy tracer man
     };
+    let file = File::create("rashcard.log");
     tracing_subscriber::fmt().with_max_level(lvl).init();
 }
 
 ///TODO Read in flashcards from cli
 ///TODO read in flashcards from markdown files
+///TODO add ability to delete a flashcard
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
@@ -89,6 +94,9 @@ fn run(
 ) -> Result<()> {
     //create the table if need be
     init_table(conn)?;
+    let flash_card_count = fetch_initial_flash_card_count(conn)?;
+    app.total_cards = flash_card_count;
+
     loop {
         term.draw(|f| render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
@@ -306,6 +314,7 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     db::save_flashcard(title, body, conn)?;
 
     app.display_saved_popup();
+    app.total_cards += 1;
     Ok(())
 }
 
@@ -314,7 +323,7 @@ fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn show_prev_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
-    show_flashcard(app, conn, Select::Prev)
+    show_flashcard(app, conn, Select::Next)
 }
 
 fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()> {

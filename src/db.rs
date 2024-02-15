@@ -24,6 +24,16 @@ pub fn init_table(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+pub fn fetch_initial_flash_card_count(conn: &Connection) -> Result<usize> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM flashcard")?;
+    let mut rows = stmt.query([])?;
+    let mut count = 0;
+    if let Some(row) = rows.next()? {
+        count = row.get(0)?;
+    }
+    Ok(count)
+}
+
 pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT INTO flashcard(title, body) values (?1, ?2)",
@@ -34,8 +44,7 @@ pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> 
 }
 
 pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCard>> {
-    let mut qry =
-        conn.prepare("SELECT title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
+    let mut qry = conn.prepare("SELECT title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
     let flashcards = qry.query_map(params![offset], |row| {
         Ok(FlashCard {
             title: row.get(0)?,

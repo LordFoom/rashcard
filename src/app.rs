@@ -30,6 +30,7 @@ pub struct App<'a> {
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
     pub current_flash_text: String,
+    pub total_cards: usize,
 }
 
 impl App<'_> {
@@ -43,6 +44,7 @@ impl App<'_> {
             popup_time: None,
             current_flashcard_number: 0,
             current_flash_text: String::new(),
+            total_cards: 0,
         }
     }
 
@@ -98,11 +100,18 @@ impl App<'_> {
 
     pub fn increment_flash_count(&mut self) {
         self.current_flashcard_number += 1;
+        if self.current_flashcard_number == self.total_cards {
+            self.current_flashcard_number = 0;
+        }
     }
 
     pub fn decrement_flash_count(&mut self) {
         //TODO we need to put in 0 bound check here
-        self.current_flashcard_number -= 1;
+        if self.current_flashcard_number == 0 {
+            self.current_flashcard_number = self.total_cards - 1
+        } else {
+            self.current_flashcard_number -= 1;
+        }
     }
 
     pub fn show_flash_card(&mut self) {
@@ -154,6 +163,7 @@ impl Default for App<'_> {
             popup_time: None,
             current_flashcard_number: 0,
             current_flash_text: String::new(),
+            total_cards: 0,
         }
     }
 }
