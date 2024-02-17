@@ -48,8 +48,14 @@ fn init_logging(level: u8) {
         2 => Level::DEBUG, //wobble
         _ => Level::TRACE, //you are the crazy tracer man
     };
+    let file_appender = tracing_appender::rolling::never("./", "rashcard.log");
+    //i wanna be a paperback I mean nonblocicking wriiiter
+    let (non_blocking_writer, _guard) = tracing_appender::non_blocking(file_appender);
     let file = File::create("rashcard.log");
-    tracing_subscriber::fmt().with_max_level(lvl).init();
+    tracing_subscriber::fmt()
+        .with_writer(non_blocking_writer)
+        .with_max_level(lvl)
+        .init();
 }
 
 ///TODO Read in flashcards from cli

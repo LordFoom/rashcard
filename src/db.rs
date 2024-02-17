@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use rusqlite::{params, Connection};
+use tracing::{info, instrument};
 
 pub struct FlashCard {
     pub title: String,
@@ -43,7 +44,9 @@ pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> 
     Ok(())
 }
 
+#[instrument]
 pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCard>> {
+    info!("This is the offset for next flashcard: {}", offset);
     let mut qry = conn.prepare("SELECT title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
     let flashcards = qry.query_map(params![offset], |row| {
         Ok(FlashCard {
