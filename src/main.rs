@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use log::LevelFilter;
 use app::{Select, State};
 use clap::Parser;
 use crossterm::{
@@ -18,8 +19,9 @@ use std::{
     fs::File,
     io::{stdout, Stdout},
 };
-use tracing::{info, instrument, Level};
+// use tracing::{info, instrument, Level};
 use tui_textarea::{Input, Key};
+use log::info;
 
 use crate::app::App;
 use crate::db::init_table;
@@ -51,11 +53,11 @@ fn init_logging(level: u8) {
     let file_appender = tracing_appender::rolling::never("./", "rashcard.log");
     //i wanna be a paperback I mean nonblocicking wriiiter
     let (non_blocking_writer, _guard) = tracing_appender::non_blocking(file_appender);
-    let file = File::create("rashcard.log");
     tracing_subscriber::fmt()
         .with_writer(non_blocking_writer)
         .with_max_level(lvl)
         .init();
+    info!("Initted logging");
 }
 
 ///TODO Read in flashcards from cli
