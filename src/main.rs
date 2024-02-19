@@ -156,12 +156,15 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
             },
             State::ShowFlashcard | State::Idling => {
                 if let Event::Key(key) = event::read().context("event read failed")? {
+                    //TODO we need to make the first show go false again when  not showing
+                    //flashcards
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
                         KeyCode::Char('n') | KeyCode::Char('N') => show_next_flashcard(app, conn)?,
                         KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
+                        KeyCode::Char('j') | KeyCode::Char('J') => app.idle(),
                         _ => info!("Go baby go go!"),
                     }
                 }
@@ -325,24 +328,30 @@ fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn show_prev_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
-    show_flashcard(app, conn, Select::Next)
+    show_flashcard(app, conn, Select::Prev)
 }
 
 fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()> {
-    app.show_flash_card();
     //get the next flashcard
+    if !app.first_shown {
+        app.first_shown = true;
+    } else {
+        match state {
+            Select::Next => app.increment_flash_count(),
+            Select::Prev => app.decrement_flash_count(),
+            Select::Random => panic!("How did we get here? Random not yet supported"),
+        }
+    };
+
     let offset = app.current_flashcard_number;
+    info!("Current flash number: {}", offset);
+    info!("State: {:?}", state);
     let txt = if let Some(flash) = db::next_flashcard(offset, conn)? {
         //we'll append everything to the title and bring it back
         let mut text = flash.title;
         let body = flash.body;
         text.push('\n');
         text.push_str(&body);
-        match state {
-            Select::Next => app.increment_flash_count(),
-            Select::Prev => app.decrement_flash_count(),
-            Select::Random => panic!("How did we get here? Random not yet supported"),
-        }
         //move onto the next flashcard
         text
     } else {
@@ -350,6 +359,11 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         "No flashcards".to_owned()
     };
 
+    app.show_flash_card();
+    info!(
+        "Our offset after changing the card: {}",
+        app.current_flashcard_number
+    );
     app.update_flash_text(&txt);
     Ok(())
 }

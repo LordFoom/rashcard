@@ -15,6 +15,7 @@ pub enum State {
     AddFlashcard,
     DisplaySavedPopup,
 }
+#[derive(Clone, Copy, Debug)]
 pub enum Select {
     Prev,
     Next,
@@ -31,6 +32,7 @@ pub struct App<'a> {
     pub current_flashcard_number: usize,
     pub current_flash_text: String,
     pub total_cards: usize,
+    pub first_shown: bool,
 }
 
 impl App<'_> {
@@ -45,6 +47,7 @@ impl App<'_> {
             current_flashcard_number: 0,
             current_flash_text: String::new(),
             total_cards: 0,
+            first_shown: false,
         }
     }
 
@@ -92,6 +95,7 @@ impl App<'_> {
 
     pub fn idle(&mut self) {
         self.set_state(State::Idling);
+        self.first_shown = false;
     }
 
     pub fn update_flash_text(&mut self, flash_text: &str) {
@@ -164,6 +168,7 @@ impl Default for App<'_> {
             current_flashcard_number: 0,
             current_flash_text: String::new(),
             total_cards: 0,
+            first_shown: false,
         }
     }
 }
