@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use log::LevelFilter;
 use app::{Select, State};
 use clap::Parser;
 use crossterm::{
@@ -9,19 +8,19 @@ use crossterm::{
     ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
+use log::{info, LevelFilter};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Paragraph},
 };
 use rusqlite::Connection;
+use std::io::{stdout, Stdout};
 use std::time::Duration;
-use std::{
-    fs::File,
-    io::{stdout, Stdout},
-};
 // use tracing::{info, instrument, Level};
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 use tui_textarea::{Input, Key};
-use log::info;
 
 use crate::app::App;
 use crate::db::init_table;
@@ -42,22 +41,26 @@ pub struct Args {
     verbosity: u8,
 }
 
-fn init_logging(level: u8) {
+fn init_logging(level: u8) -> Result<()> {
     //TODO set this via config
     let lvl = match level {
-        0 => Level::ERROR, //rock solid confidence
-        1 => Level::INFO,  //wibble
-        2 => Level::DEBUG, //wobble
-        _ => Level::TRACE, //you are the crazy tracer man
+        0 => LevelFilter::Error, //rock solid confidence
+        1 => LevelFilter::Info,  //wibble
+        2 => LevelFilter::Debug, //wobble
+        _ => LevelFilter::Trace, //you are the crazy tracer man
     };
-    let file_appender = tracing_appender::rolling::never("./", "rashcard.log");
+    let logfile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
+        .build("rashcard.log")?;
     //i wanna be a paperback I mean nonblocicking wriiiter
-    let (non_blocking_writer, _guard) = tracing_appender::non_blocking(file_appender);
-    tracing_subscriber::fmt()
-        .with_writer(non_blocking_writer)
-        .with_max_level(lvl)
-        .init();
+    let config = Config::builder()
+        .appender(Appender::builder().build("logfile", Box::new(logfile)))
+        .build(Root::builder().appender("logfile").build(lvl))?;
+
+    log4rs::init_config(config)?;
+
     info!("Initted logging");
+    Ok(())
 }
 
 ///TODO Read in flashcards from cli
@@ -295,7 +298,6 @@ fn centered_rect(h: u16, v: u16, rect: Rect) -> Rect {
         .split(layout[1])[1]
 }
 
-#[instrument]
 fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     // println!("About to save the flash card");
     //get the text from app
@@ -310,14 +312,6 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     //
     //everything else is body
     let body = &lines[1..].join("\n");
-    // .iter()
-    // // .fold(String::new(), |mut output, line|{
-    // //         let _ = write!(output, line);
-    // //     let _ = write!(output, "\n");
-    // //     output
-    // // })
-    // .map(|line| format!("{}{}", line, "\n"))
-    // .collect::<String>();
 
     db::save_flashcard(title, body, conn)?;
 

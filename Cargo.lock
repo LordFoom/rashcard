@@ -634,6 +634,7 @@ dependencies = [
  "anyhow",
  "clap",
  "crossterm",
+ "log",
  "log4rs",
  "ratatui",
  "rusqlite",
