@@ -37,8 +37,12 @@ mod db;
     long_about = "Flashcard to make knowledge stick like rust to metal"
 )]
 pub struct Args {
+    ///How much to spew to the file
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbosity: u8,
+    ///Is there a markdown file to read text from?
+    #[arg(short, long, action = clap::ArgAction::Count)]
+    file: Option<String>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
@@ -69,7 +73,11 @@ fn init_logging(level: u8) -> Result<()> {
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
-    init_logging(app.verbosity.clone());
+    init_logging(app.verbosity.clone())?;
+
+    if let Some(file) = args.file {
+        //TODO put the  file slurping in here
+    }
     let mut terminal = setup_terminal().context("setup failed")?;
     let conn = default_connection().context("failed to get sql connection")?;
     run(app, &conn, &mut terminal).context("failed running")?;
