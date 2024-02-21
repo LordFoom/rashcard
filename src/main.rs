@@ -8,6 +8,7 @@ use crossterm::{
     ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
+use import::import_read_era_quotes;
 use log::{info, LevelFilter};
 use ratatui::{
     prelude::*,
@@ -27,6 +28,7 @@ use crate::db::init_table;
 
 mod app;
 mod db;
+mod import;
 
 ///Command line arguments for clap
 #[derive(Parser)]
@@ -75,8 +77,10 @@ fn main() -> Result<()> {
     let app = App::from_arguments(&args);
     init_logging(app.verbosity.clone())?;
 
+    //TODO finish importing
     if let Some(file) = args.file {
-        //TODO put the  file slurping in here
+        import_read_era_quotes(&file)?;
+        println!("Imported flashcards from {}", file);
     }
     let mut terminal = setup_terminal().context("setup failed")?;
     let conn = default_connection().context("failed to get sql connection")?;
