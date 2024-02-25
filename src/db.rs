@@ -2,6 +2,7 @@ use anyhow::{bail, Result};
 use log::info;
 use rusqlite::{params, Connection};
 
+#[derive(Debug)]
 pub struct FlashCard {
     pub title: String,
     pub body: String,

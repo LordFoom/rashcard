@@ -1,5 +1,3 @@
-use std::fs::File;
-
 use anyhow::Result;
 use rusqlite::Connection;
 use crate::db::FlashCard;
@@ -14,7 +12,7 @@ pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
     //second line: author
     //rest is entries
 
-    extract_flash_cards(file_contents);
+    let flash_cards = extract_flash_cards(file_contents)?;
     //TODO here wi stick it into the db, will need to pass in conn
     //OOOOR do we return the collection?
 
@@ -47,8 +45,13 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>>{
             //not the title card
             body = flash_card.to_string();
         }
+
+        let mut flash_card_title = String::new();
+        flash_card_title.push_str(&title);
+        flash_card_title.push('\n');
+        flash_card_title.push_str(&author);
         let fc = FlashCard{
-            title: title.clone(),
+            title: flash_card_title,
             body,
         };
         fcards.push(fc);
@@ -57,7 +60,27 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>>{
 }
 
 mod test{
+    use crate::import::extract_flash_cards;
 
     #[test]
-    pub fn test_
+    pub fn test_extract_flash_cards(){
+        let text = r"Test title
+            test author
+this is test line one.
+This is test line two.
+*****
+      second flascard line one.
+  second Flashcard line two.
+Second flashcard line 3..
+*****
+Third flashcard, foomy,
+Foombletoning
+Fumbleturning
+Sevenslurring
+Underscarring
+--".to_string();
+        let flashcards = extract_flash_cards(text).unwrap();
+        assert_eq!(3, flashcards.len());
+        println!("flashcards! {:?}", flashcards);
+    }
 }

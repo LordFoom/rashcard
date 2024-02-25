@@ -78,12 +78,12 @@ fn main() -> Result<()> {
     init_logging(app.verbosity.clone())?;
 
     //TODO finish importing
+    let conn = default_connection().context("failed to get sql connection")?;
     if let Some(file) = args.file {
-        import_read_era_quotes(&file)?;
+        import_read_era_quotes(&file, &conn)?;
         println!("Imported flashcards from {}", file);
     }
     let mut terminal = setup_terminal().context("setup failed")?;
-    let conn = default_connection().context("failed to get sql connection")?;
     run(app, &conn, &mut terminal).context("failed running")?;
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
