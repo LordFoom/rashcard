@@ -12,7 +12,7 @@ use import::import_read_era_quotes;
 use log::{info, LevelFilter};
 use ratatui::{
     prelude::*,
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Borders, Paragraph, Wrap},
 };
 use rusqlite::Connection;
 use std::time::Duration;
@@ -284,11 +284,13 @@ fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
 
 fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     let text = &app.current_flash_text;
-    let msg = Paragraph::new(&text[..]).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan)),
-    );
+    let msg = Paragraph::new(&text[..])
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(Color::Cyan)),
+        )
+        .wrap(Wrap { trim: false });
 
     frame.render_widget(msg, rect);
 }
