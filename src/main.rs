@@ -15,8 +15,11 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph},
 };
 use rusqlite::Connection;
-use std::io::{stdout, Stdout};
 use std::time::Duration;
+use std::{
+    io::{stdout, Stdout},
+    process::exit,
+};
 // use tracing::{info, instrument, Level};
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
@@ -43,7 +46,7 @@ pub struct Args {
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbosity: u8,
     ///Is there a markdown file to read text from?
-    #[arg(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long)]
     file: Option<String>,
 }
 
@@ -79,9 +82,11 @@ fn main() -> Result<()> {
 
     //TODO finish importing
     let conn = default_connection().context("failed to get sql connection")?;
+    init_table(&conn)?;
     if let Some(file) = args.file {
         import_read_era_quotes(&file, &conn)?;
         println!("Imported flashcards from {}", file);
+        return Ok(());
     }
     let mut terminal = setup_terminal().context("setup failed")?;
     run(app, &conn, &mut terminal).context("failed running")?;
@@ -116,7 +121,6 @@ fn run(
     term: &mut Terminal<CrosstermBackend<Stdout>>,
 ) -> Result<()> {
     //create the table if need be
-    init_table(conn)?;
     let flash_card_count = fetch_initial_flash_card_count(conn)?;
     app.total_cards = flash_card_count;
 

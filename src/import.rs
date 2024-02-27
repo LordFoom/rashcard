@@ -1,6 +1,6 @@
+use crate::db::{save_flashcard_object, FlashCard};
 use anyhow::Result;
 use rusqlite::Connection;
-use crate::db::FlashCard;
 
 ///Import a file into the flashcards using the ReadEra exported format
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
@@ -8,18 +8,16 @@ use crate::db::FlashCard;
 pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let file_contents = std::fs::read_to_string(fp)?;
     //now we parse the file contents
-    //first line: title
-    //second line: author
-    //rest is entries
-
-    let flash_cards = extract_flash_cards(file_contents)?;
     //TODO here wi stick it into the db, will need to pass in conn
-    //OOOOR do we return the collection?
+    extract_flash_cards(file_contents)?
+        .into_iter()
+        .try_for_each(|flashcard| -> Result<()> { save_flashcard_object(&flashcard, conn) })?;
 
     Ok(())
 }
 
-fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>>{
+///Take readera style exported notes and extract them as flashcard objects
+fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
     let mut title = String::new();
     let mut author = String::new();
 
@@ -50,7 +48,7 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>>{
         flash_card_title.push_str(&title);
         flash_card_title.push('\n');
         flash_card_title.push_str(&author);
-        let fc = FlashCard{
+        let fc = FlashCard {
             title: flash_card_title,
             body,
         };
@@ -59,11 +57,11 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>>{
     Ok(fcards)
 }
 
-mod test{
+mod test {
     use crate::import::extract_flash_cards;
 
     #[test]
-    pub fn test_extract_flash_cards(){
+    pub fn test_extract_flash_cards() {
         let text = r"Test title
             test author
 this is test line one.
@@ -78,7 +76,8 @@ Foombletoning
 Fumbleturning
 Sevenslurring
 Underscarring
---".to_string();
+--"
+        .to_string();
         let flashcards = extract_flash_cards(text).unwrap();
         assert_eq!(3, flashcards.len());
         println!("flashcards! {:?}", flashcards);

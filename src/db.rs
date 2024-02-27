@@ -36,6 +36,10 @@ pub fn fetch_initial_flash_card_count(conn: &Connection) -> Result<usize> {
     Ok(count)
 }
 
+pub fn save_flashcard_object(fc: &FlashCard, conn: &Connection) -> Result<()> {
+    save_flashcard(&fc.title, &fc.body, conn)
+}
+
 pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT INTO flashcard(title, body) values (?1, ?2)",
