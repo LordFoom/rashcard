@@ -75,6 +75,8 @@ fn init_logging(level: u8) -> Result<()> {
 ///TODO Read in flashcards from cli
 ///TODO add ability to delete a flashcard
 ///TODO Random flashcard
+///TODO Timer to show cards in time
+///TODO Set timer mode (forward, backward, random)
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
@@ -364,7 +366,7 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         match state {
             Select::Next => app.increment_flash_count(),
             Select::Prev => app.decrement_flash_count(),
-            Select::Random => panic!("How did we get here? Random not yet supported"),
+            Select::Random => app.randomize_flash_count(),
         }
     };
 
