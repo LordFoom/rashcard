@@ -118,6 +118,8 @@ impl App<'_> {
         }
     }
 
+    pub fn randomize_flash_count(&mut self) {}
+
     pub fn show_flash_card(&mut self) {
         self.set_state(State::ShowFlashcard);
     }

@@ -73,8 +73,8 @@ fn init_logging(level: u8) -> Result<()> {
 }
 
 ///TODO Read in flashcards from cli
-///TODO read in flashcards from markdown files
 ///TODO add ability to delete a flashcard
+///TODO Random flashcard
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
@@ -178,6 +178,9 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),
                         KeyCode::Char('n') | KeyCode::Char('N') => show_next_flashcard(app, conn)?,
+                        KeyCode::Char('r') | KeyCode::Char('R') => {
+                            show_random_flashcard(app, conn)?
+                        }
                         KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         KeyCode::Char('j') | KeyCode::Char('J') => app.idle(),
@@ -206,7 +209,7 @@ fn render_app(frame: &mut Frame, app: &mut App) {
     //render the top message
     let msg = Paragraph::new(
         "Welcome to Rashcard, the Rust Flashcard application
-         [N]ext | [P]revious | [A]dd | [Q]uit",
+         [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit",
     )
     .block(
         Block::default()
@@ -339,6 +342,10 @@ fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     app.display_saved_popup();
     app.total_cards += 1;
     Ok(())
+}
+
+fn show_random_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    show_flashcard(app, conn, Select::Random)
 }
 
 fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
