@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use rand::Rng;
 use ratatui::{
     style::{Color, Style},
     widgets::{Block, Borders},
@@ -118,7 +119,17 @@ impl App<'_> {
         }
     }
 
-    pub fn randomize_flash_count(&mut self) {}
+    pub fn randomize_flash_count(&mut self) {
+        let mut rng = rand::thread_rng();
+
+        loop {
+            let tmp = rng.gen_range(0..self.total_cards);
+            if tmp != self.current_flashcard_number {
+                self.current_flashcard_number = tmp;
+                break;
+            }
+        }
+    }
 
     pub fn show_flash_card(&mut self) {
         self.set_state(State::ShowFlashcard);

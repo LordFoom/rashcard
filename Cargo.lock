@@ -636,6 +636,7 @@ dependencies = [
  "crossterm",
  "log",
  "log4rs",
+ "rand",
  "ratatui",
  "rusqlite",
  "tracing-appender",
