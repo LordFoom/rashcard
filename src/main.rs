@@ -234,7 +234,11 @@ fn render_app(frame: &mut Frame, app: &mut App) {
             app.close_popup_if_it_is_time();
         }
     }
+
+    let side_bar = cols[1];
 }
+
+fn draw_sidebar(frame: &mut Frame, rect: Rect) {}
 
 ///It's a placeholder
 fn draw_placeholder(frame: &mut Frame, rect: Rect) {
