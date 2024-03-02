@@ -3,22 +3,20 @@ use app::{Select, State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
+    ExecutableCommand,
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-    ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
 use import::import_read_era_quotes;
 use log::{info, LevelFilter};
 use ratatui::{
     prelude::*,
-    widgets::{Block, Borders, Paragraph, Wrap},
 };
 use rusqlite::Connection;
 use std::time::Duration;
 use std::{
     io::{stdout, Stdout},
-    process::exit,
 };
 // use tracing::{info, instrument, Level};
 use log4rs::append::file::FileAppender;
@@ -32,6 +30,7 @@ use crate::db::init_table;
 mod app;
 mod db;
 mod import;
+mod ui;
 
 ///Command line arguments for clap
 #[derive(Parser)]
@@ -127,7 +126,7 @@ fn run(
     app.total_cards = flash_card_count;
 
     loop {
-        term.draw(|f| render_app(f, &mut app))?;
+        term.draw(|f| ui::render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
         if !app.running {
             // info!("Going down!");
@@ -194,138 +193,6 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
         }
     }
     Ok(())
-}
-
-fn render_app(frame: &mut Frame, app: &mut App) {
-    let size = frame.size();
-    //we make some rows
-    let rows = Layout::new()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
-        .split(size);
-    let cols = Layout::new()
-        .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
-        .direction(Direction::Horizontal)
-        .split(rows[1]);
-
-    //render the top message
-    let msg = Paragraph::new(
-        "Welcome to Rashcard, the Rust Flashcard application
-         [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit",
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Yellow)),
-    );
-
-    frame.render_widget(msg, rows[0]);
-    let main_display = cols[0];
-    //now we do the main panel
-
-    match app.state {
-        app::State::Idling => draw_placeholder(frame, main_display),
-        app::State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
-        app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
-        app::State::DisplaySavedPopup => {
-            // info!("Saved! About to display the same");
-            //TODO overlay this on the text area
-            draw_saved_popup(frame).unwrap();
-            app.close_popup_if_it_is_time();
-        }
-    }
-
-    let side_bar = cols[1];
-}
-
-fn draw_sidebar(frame: &mut Frame, rect: Rect) {}
-
-///It's a placeholder
-fn draw_placeholder(frame: &mut Frame, rect: Rect) {
-    let msg = Paragraph::new("Placeholder-holder-holder-holder-der-r").block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan)),
-    );
-
-    frame.render_widget(msg, rect);
-}
-///Currently a placeholder
-fn display_in_main_window(maybe_msg: Option<&str>) -> Result<()> {
-    let msg = if let Some(passed_in_msg) = maybe_msg {
-        passed_in_msg
-    } else {
-        ""
-    };
-
-    let paragraph = Paragraph::new(msg).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan)),
-    );
-
-    Ok(())
-}
-
-fn draw_saved_popup(f: &mut Frame) -> Result<()> {
-    display_popup("Saved", f)
-}
-
-fn display_popup(msg: &str, f: &mut Frame) -> Result<()> {
-    let msg = Paragraph::new(msg).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::DarkGray)),
-    );
-
-    //TODO some kind of centered rect method
-    //
-    let rect = centered_rect(20, 20, f.size());
-    f.render_widget(msg, rect);
-    Ok(())
-}
-
-///Will display the text area we keep in our app for just this occasion
-fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
-    // app.init_input_area();
-    frame.render_widget(app.input_area.widget(), rect)
-}
-
-fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
-    let text = &app.current_flash_text;
-    let msg = Paragraph::new(&text[..])
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .style(Style::default().fg(Color::Cyan)),
-        )
-        .wrap(Wrap { trim: false });
-
-    frame.render_widget(msg, rect);
-}
-
-///Create a 'centered' rect using percentage
-fn centered_rect(h: u16, v: u16, rect: Rect) -> Rect {
-    //cut into 3 vertical rows
-    let layout = Layout::new()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage((100 - v) / 2),
-            Constraint::Percentage(v),
-            Constraint::Percentage((100 - v) / 2),
-        ])
-        .split(rect);
-
-    //now we split the middle vertical block into 3 columns
-    //and we return the middle column
-    Layout::new()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage((100 - h) / 2),
-            Constraint::Percentage(h),
-            Constraint::Percentage((100 - h) / 2),
-        ])
-        .split(layout[1])[1]
 }
 
 fn save_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
