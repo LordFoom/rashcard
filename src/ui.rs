@@ -45,11 +45,12 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
     }
 
     let side_bar = cols[1];
-    draw_sidebar(frame, side_bar)
+    let message_text = format!("Card #{}", app.current_flashcard_number);
+    draw_sidebar(&message_text, frame, side_bar)
 }
 
-fn draw_sidebar(frame: &mut Frame, rect: Rect) {
-    let content = Paragraph::new("Sidebar").block(
+fn draw_sidebar(txt:&str, frame: &mut Frame, rect: Rect) {
+    let content = Paragraph::new(txt).block(
         Block::default()
             .borders(Borders::ALL)
             .style(Style::default().fg(Color::LightBlue)),
