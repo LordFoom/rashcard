@@ -1,10 +1,10 @@
-use anyhow::Result;
-use ratatui::Frame;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
-use ratatui::prelude::{Color, Style};
 use crate::app;
 use crate::app::App;
+use anyhow::Result;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::prelude::{Color, Style};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::Frame;
 
 pub fn render_app(frame: &mut Frame, app: &mut App) {
     let size = frame.size();
@@ -45,11 +45,16 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
     }
 
     let side_bar = cols[1];
-    let message_text = format!("Card #{}", app.current_flashcard_number);
+
+    let message_text = format!(
+        r"Total Cards: {}
+This is card #{}",
+        app.total_cards, app.current_flashcard_number
+    );
     draw_sidebar(&message_text, frame, side_bar)
 }
 
-fn draw_sidebar(txt:&str, frame: &mut Frame, rect: Rect) {
+fn draw_sidebar(txt: &str, frame: &mut Frame, rect: Rect) {
     let content = Paragraph::new(txt).block(
         Block::default()
             .borders(Borders::ALL)
@@ -69,7 +74,6 @@ fn draw_placeholder(frame: &mut Frame, rect: Rect) {
 
     frame.render_widget(msg, rect);
 }
-
 
 fn draw_saved_popup(f: &mut Frame) -> anyhow::Result<()> {
     display_popup("Saved", f)
