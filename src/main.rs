@@ -3,21 +3,17 @@ use app::{Select, State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
-    ExecutableCommand,
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
 use import::import_read_era_quotes;
 use log::{info, LevelFilter};
-use ratatui::{
-    prelude::*,
-};
+use ratatui::prelude::*;
 use rusqlite::Connection;
+use std::io::{stdout, Stdout};
 use std::time::Duration;
-use std::{
-    io::{stdout, Stdout},
-};
 // use tracing::{info, instrument, Level};
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
@@ -47,10 +43,12 @@ pub struct Args {
     ///Is there a markdown file to read text from?
     #[arg(short, long)]
     file: Option<String>,
+    ///Display random flashcard every N seconds
+    #[arg(short, long)]
+    timer: Option<usize>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
-    //TODO set this via config
     let lvl = match level {
         0 => LevelFilter::Error, //rock solid confidence
         1 => LevelFilter::Info,  //wibble
@@ -71,9 +69,7 @@ fn init_logging(level: u8) -> Result<()> {
     Ok(())
 }
 
-///TODO Read in flashcards from cli
 ///TODO add ability to delete a flashcard
-///TODO Random flashcard
 ///TODO Timer to show cards in time
 ///TODO Set timer mode (forward, backward, random)
 fn main() -> Result<()> {
@@ -81,7 +77,6 @@ fn main() -> Result<()> {
     let app = App::from_arguments(&args);
     init_logging(app.verbosity.clone())?;
 
-    //TODO finish importing
     let conn = default_connection().context("failed to get sql connection")?;
     init_table(&conn)?;
     if let Some(file) = args.file {
@@ -173,8 +168,6 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
             },
             State::ShowFlashcard | State::Idling => {
                 if let Event::Key(key) = event::read().context("event read failed")? {
-                    //TODO we need to make the first show go false again when  not showing
-                    //flashcards
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') => app.stop_running(),
                         KeyCode::Char('a') | KeyCode::Char('A') => app.show_add_flashcard(),

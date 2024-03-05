@@ -86,8 +86,6 @@ fn display_popup(msg: &str, f: &mut Frame) -> anyhow::Result<()> {
             .style(Style::default().fg(Color::DarkGray)),
     );
 
-    //TODO some kind of centered rect method
-    //
     let rect = centered_rect(20, 20, f.size());
     f.render_widget(msg, rect);
     Ok(())

@@ -8,7 +8,6 @@ use rusqlite::Connection;
 pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let file_contents = std::fs::read_to_string(fp)?;
     //now we parse the file contents
-    //TODO here wi stick it into the db, will need to pass in conn
     extract_flash_cards(file_contents)?
         .into_iter()
         .try_for_each(|flashcard| -> Result<()> { save_flashcard_object(&flashcard, conn) })?;

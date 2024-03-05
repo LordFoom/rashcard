@@ -111,7 +111,6 @@ impl App<'_> {
     }
 
     pub fn decrement_flash_count(&mut self) {
-        //TODO we need to put in 0 bound check here
         if self.current_flashcard_number == 0 {
             self.current_flashcard_number = self.total_cards - 1
         } else {
