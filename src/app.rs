@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use rand::Rng;
 use ratatui::{
@@ -34,6 +34,11 @@ pub struct App<'a> {
     pub current_flash_text: String,
     pub total_cards: usize,
     pub first_shown: bool,
+}
+
+pub struct Timer {
+    pub start: Instant,
+    pub next_card_cycle: usize,
 }
 
 impl App<'_> {

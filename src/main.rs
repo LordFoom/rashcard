@@ -13,14 +13,14 @@ use log::{info, LevelFilter};
 use ratatui::prelude::*;
 use rusqlite::Connection;
 use std::io::{stdout, Stdout};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 // use tracing::{info, instrument, Level};
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use tui_textarea::{Input, Key};
 
-use crate::app::App;
+use crate::app::{App, Timer};
 use crate::db::init_table;
 
 mod app;
@@ -84,8 +84,20 @@ fn main() -> Result<()> {
         println!("Imported flashcards from {}", file);
         return Ok(());
     }
+    let mut maybe_timer = if let Some(t) = args.timer {
+        let start = Instant::now();
+        let next_card_cycle = t;
+        let timer = Timer{
+            start,
+            next_card_cycle
+        };
+        Some(timer)
+    }else{
+        None
+    };
+
     let mut terminal = setup_terminal().context("setup failed")?;
-    run(app, &conn, &mut terminal).context("failed running")?;
+    run(app, &conn, &mut maybe_timer, &mut terminal).context("failed running")?;
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
     unsetup_terminal(&mut terminal).context("unsetup failed")
@@ -114,6 +126,7 @@ fn unsetup_terminal(term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()>
 fn run(
     mut app: App,
     conn: &Connection,
+    maybe_timer: &mut Option<Timer>,
     term: &mut Terminal<CrosstermBackend<Stdout>>,
 ) -> Result<()> {
     //create the table if need be
@@ -126,6 +139,13 @@ fn run(
         if !app.running {
             // info!("Going down!");
             break;
+        }
+        //we want to flick through if we've been passed a timer
+        if let Some(t) = maybe_timer {
+            if t.start.elapsed().as_secs() > t.next_card_cycle as u64 {
+                show_random_flashcard(&mut app, conn)?;
+                t.start = Instant::now();
+            }
         }
     }
     Ok(())
