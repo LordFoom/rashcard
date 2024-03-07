@@ -3,6 +3,7 @@ use crate::app::App;
 use anyhow::Result;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Style};
+use ratatui::style::Modifier;
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::Frame;
 
@@ -19,11 +20,15 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
         .split(rows[1]);
 
     //render the top message
-    let msg = Paragraph::new(
-        "Welcome to Rashcard, the Rust Flashcard application
-         [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit",
-    )
-    .block(
+    let top_text = match app.state {
+        app::State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
+        _ => {
+            "Welcome to Rashcard, the Rust Flashcard application
+         [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit"
+        }
+    };
+
+    let msg = Paragraph::new(top_text).block(
         Block::default()
             .borders(Borders::ALL)
             .style(Style::default().fg(Color::Yellow)),
@@ -66,10 +71,12 @@ fn draw_sidebar(txt: &str, frame: &mut Frame, rect: Rect) {
 
 ///It's a placeholder
 fn draw_placeholder(frame: &mut Frame, rect: Rect) {
-    let msg = Paragraph::new("Placeholder-holder-holder-holder-der-r").block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan)),
+    let msg = Paragraph::new("R A S H C A R D __ R A S H O M O N").block(
+        Block::default().borders(Borders::ALL).style(
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
     );
 
     frame.render_widget(msg, rect);

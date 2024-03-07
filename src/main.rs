@@ -70,8 +70,11 @@ fn init_logging(level: u8) -> Result<()> {
 }
 
 ///TODO add ability to delete a flashcard
-///TODO Timer to show cards in time
 ///TODO Set timer mode (forward, backward, random)
+///TODO Add open file dialog
+///TODO add plugin framework for formats
+///TODO convert readme reading into plugin
+/// Rash: obsolete : quickly effective
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
@@ -137,7 +140,6 @@ fn run(
         term.draw(|f| ui::render_app(f, &mut app))?;
         read_input(&mut app, conn)?;
         if !app.running {
-            // info!("Going down!");
             break;
         }
         //we want to flick through if we've been passed a timer
@@ -171,7 +173,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     ..
                 } => save_flashcard(app, conn)?,
                 Input {
-                    key: Key::Char('j'),
+                    key: Key::Char('b'),
                     ctrl: true,
                     ..
                 } => {
