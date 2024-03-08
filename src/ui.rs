@@ -49,12 +49,14 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
         }
     }
 
+    //down at the SIDE-BAR, SIDE-BAR, SIDE-BAR!!
     let side_bar = cols[1];
 
     let message_text = format!(
         r"Total Cards: {}
-This is card #{}",
-        app.total_cards, app.current_flashcard_number
+This is card #{}
+Cards displayed: {}",
+        app.total_cards, app.current_flashcard_number, app.cards_displayed
     );
     draw_sidebar(&message_text, frame, side_bar)
 }

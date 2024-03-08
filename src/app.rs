@@ -34,6 +34,7 @@ pub struct App<'a> {
     pub current_flash_text: String,
     pub total_cards: usize,
     pub first_shown: bool,
+    pub cards_displayed: usize,
 }
 
 pub struct Timer {
@@ -54,6 +55,7 @@ impl App<'_> {
             current_flash_text: String::new(),
             total_cards: 0,
             first_shown: false,
+            cards_displayed: 0,
         }
     }
 
@@ -143,12 +145,13 @@ impl App<'_> {
         self.current_flashcard_number = 0;
     }
 
-    pub fn flip_flashcard(&mut self) {
-        self.set_state(State::ShowFlashcard);
+    ///Increase count of number of cards which have been displayed on the screen
+    pub fn increment_display_count(&mut self) {
+        self.cards_displayed += 1;
     }
 
-    pub fn saved(&mut self) {
-        self.set_state(State::DisplaySavedPopup);
+    pub fn flip_flashcard(&mut self) {
+        self.set_state(State::ShowFlashcard);
     }
 
     ///Return whatever text there is in the text_area,
@@ -186,6 +189,7 @@ impl Default for App<'_> {
             current_flash_text: String::new(),
             total_cards: 0,
             first_shown: false,
+            cards_displayed: 0,
         }
     }
 }

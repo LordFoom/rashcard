@@ -90,12 +90,12 @@ fn main() -> Result<()> {
     let mut maybe_timer = if let Some(t) = args.timer {
         let start = Instant::now();
         let next_card_cycle = t;
-        let timer = Timer{
+        let timer = Timer {
             start,
-            next_card_cycle
+            next_card_cycle,
         };
         Some(timer)
-    }else{
+    } else {
         None
     };
 
@@ -278,5 +278,6 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         app.current_flashcard_number
     );
     app.update_flash_text(&txt);
+    app.increment_display_count();
     Ok(())
 }
