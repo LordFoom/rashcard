@@ -56,7 +56,7 @@ fn init_logging(level: u8) -> Result<()> {
         _ => LevelFilter::Trace, //you are the crazy tracer man
     };
     let logfile = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
+        .encoder(Box::new(PatternEncoder::new("{d} {l} - {m}{n}")))
         .build("rashcard.log")?;
     //i wanna be a paperback I mean nonblocicking wriiiter
     let config = Config::builder()
@@ -94,6 +94,7 @@ fn main() -> Result<()> {
             start,
             next_card_cycle,
         };
+        info!("We have a timer! {}s", t);
         Some(timer)
     } else {
         None
