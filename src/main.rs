@@ -47,7 +47,7 @@ pub struct Args {
     #[arg(short, long)]
     timer: Option<usize>,
     #[arg(short, long, requires("timer"))]
-    mode: String,
+    mode: Option<String>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
