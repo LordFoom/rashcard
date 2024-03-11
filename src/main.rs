@@ -46,6 +46,8 @@ pub struct Args {
     ///Display random flashcard every N seconds
     #[arg(short, long)]
     timer: Option<usize>,
+    #[arg(short, long, requires("timer"))]
+    mode: String,
 }
 
 fn init_logging(level: u8) -> Result<()> {
