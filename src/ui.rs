@@ -1,9 +1,10 @@
 use crate::app::{self, App};
 use anyhow::Result;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::prelude::{Color, Style};
+use ratatui::prelude::{Color, Style, Margin};
 use ratatui::style::Modifier;
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::symbols::scrollbar;
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap, Scrollbar, ScrollbarOrientation};
 use ratatui::Frame;
 
 pub fn render_app(frame: &mut Frame, app: &mut App) {
@@ -107,7 +108,12 @@ fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
 
 fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     let text = &app.current_flash_text;
+    let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
+        .begin_symbol(Some("↑"))
+        .end_symbol(Some("↓"))
+    
     let msg = Paragraph::new(&text[..])
+        .scroll((0,0))
         .block(
             Block::default()
                 .borders(Borders::ALL)
@@ -116,6 +122,11 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
         .wrap(Wrap { trim: false });
 
     frame.render_widget(msg, rect);
+    frame.render_stateful_widget(scrollbar, area.inner(&Margin{
+        //inside the block 
+        vertical: 1,
+        horizontal: 0,
+    }), state)
 }
 
 ///Create a 'centered' rect using percentage
