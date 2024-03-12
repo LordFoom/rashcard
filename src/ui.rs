@@ -1,5 +1,4 @@
-use crate::app;
-use crate::app::App;
+use crate::app::{self, App};
 use anyhow::Result;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Style};
