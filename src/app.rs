@@ -3,7 +3,8 @@ use std::time::{Duration, Instant};
 use rand::Rng;
 use ratatui::{
     style::{Color, Style},
-    widgets::{Block, Borders},
+    text::Line,
+    widgets::{Block, Borders, Scrollbar, ScrollbarState},
 };
 use tui_textarea::TextArea;
 
@@ -29,6 +30,8 @@ pub struct App<'a> {
     pub prior_state: State,
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
+    pub scrollbar_state: ScrollbarState,
+    pub vertical_scroll: usize,
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
     pub current_flash_text: String,
@@ -50,6 +53,7 @@ impl App<'_> {
             prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
+            scrollbar_state: Scrollbar::default(),
             popup_time: None,
             current_flashcard_number: 0,
             current_flash_text: String::new(),
@@ -110,6 +114,14 @@ impl App<'_> {
         self.current_flash_text = flash_text.to_string();
     }
 
+    ///Reset the scrollbar state based on self.current_flash_text
+    pub fn update_scrollbar_state(&mut self) {
+        let content = self.text_lines();
+        self.scrollbar_state.content_length(content.len());
+        //reset to the beginning bebe
+        self.vertical_scroll = 0;
+    }
+
     pub fn increment_flash_count(&mut self) {
         self.current_flashcard_number += 1;
         if self.current_flashcard_number == self.total_cards {
@@ -154,13 +166,13 @@ impl App<'_> {
         self.set_state(State::ShowFlashcard);
     }
 
-    ///Return whatever text there is in the text_area,
-    ///as a single string with newlines separating the lines.
-    pub fn text(&self) -> String {
-        let mut full_text = String::new();
-        for line in self.input_area.lines() {
-            full_text.push_str(line);
-            full_text.push('\n');
+    ///A vec of lines for the current flashcard
+    pub fn text_lines(&self) -> Vec<Line> {
+        let mut full_text = Vec::new();
+
+        for line in self.current_flash_text.split('\n') {
+            let ln = Line::from(line);
+            full_text.push(ln);
         }
         full_text
     }
@@ -176,6 +188,10 @@ pub fn init_input_area<'a>() -> TextArea<'a> {
     ta
 }
 
+pub fn init_scrollbar_state() -> ScrollbarState {
+    ScrollbarState::new(0)
+}
+
 impl Default for App<'_> {
     fn default() -> Self {
         Self {
@@ -184,6 +200,8 @@ impl Default for App<'_> {
             state: State::Idling,
             verbosity: 0,
             input_area: init_input_area(),
+            scrollbar_state: init_scrollbar_state(),
+            vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
             current_flash_text: String::new(),

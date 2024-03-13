@@ -275,12 +275,13 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         "No flashcards".to_owned()
     };
 
-    app.show_flash_card();
     info!(
         "Our offset after changing the card: {}",
         app.current_flashcard_number
     );
     app.update_flash_text(&txt);
+    app.update_scrollbar_state();
     app.increment_display_count();
+    app.show_flash_card();
     Ok(())
 }
