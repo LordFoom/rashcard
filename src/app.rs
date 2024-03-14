@@ -1,10 +1,10 @@
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use rand::Rng;
 use ratatui::{
     style::{Color, Style},
     text::Line,
-    widgets::{Block, Borders, Scrollbar, ScrollbarState},
+    widgets::{Block, Borders, ScrollbarState},
 };
 use tui_textarea::TextArea;
 
@@ -53,7 +53,8 @@ impl App<'_> {
             prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
-            scrollbar_state: Scrollbar::default(),
+            scrollbar_state: ScrollbarState::default(),
+            vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
             current_flash_text: String::new(),
@@ -115,7 +116,7 @@ impl App<'_> {
     }
 
     ///Reset the scrollbar state based on self.current_flash_text
-    pub fn update_scrollbar_state(&mut self) {
+    pub fn reset_scrollbar_state(&mut self) {
         let content = self.text_lines();
         self.scrollbar_state.content_length(content.len());
         //reset to the beginning bebe

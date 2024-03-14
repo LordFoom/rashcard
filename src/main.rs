@@ -32,7 +32,7 @@ mod ui;
 #[derive(Parser)]
 #[command(
     author = "foom",
-    version = "0.1",
+    version = "1.1",
     about = "Flashcards in rust",
     long_about = "Flashcard to make knowledge stick like rust to metal"
 )]
@@ -202,7 +202,8 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         }
                         KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
-                        KeyCode::Char('j') | KeyCode::Char('J') => app.idle(),
+                        KeyCode::Char('b') | KeyCode::Char('B') => app.idle(),
+                        // KeyCode
                         _ => info!("Go baby go go!"),
                     }
                 }
@@ -280,7 +281,7 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         app.current_flashcard_number
     );
     app.update_flash_text(&txt);
-    app.update_scrollbar_state();
+    app.reset_scrollbar_state();
     app.increment_display_count();
     app.show_flash_card();
     Ok(())
