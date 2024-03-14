@@ -30,7 +30,6 @@ pub struct App<'a> {
     pub prior_state: State,
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
-    pub scrollbar_state: ScrollbarState,
     pub vertical_scroll: usize,
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
@@ -53,7 +52,6 @@ impl App<'_> {
             prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
-            scrollbar_state: ScrollbarState::default(),
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
@@ -117,8 +115,6 @@ impl App<'_> {
 
     ///Reset the scrollbar state based on self.current_flash_text
     pub fn reset_scrollbar_state(&mut self) {
-        let content = self.text_lines();
-        self.scrollbar_state.content_length(content.len());
         //reset to the beginning bebe
         self.vertical_scroll = 0;
     }
@@ -201,7 +197,6 @@ impl Default for App<'_> {
             state: State::Idling,
             verbosity: 0,
             input_area: init_input_area(),
-            scrollbar_state: init_scrollbar_state(),
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,

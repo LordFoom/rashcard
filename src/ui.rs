@@ -1,9 +1,10 @@
 use crate::app::{self, App};
-use log::info;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Margin, Style};
 use ratatui::style::Modifier;
-use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, Wrap};
+use ratatui::widgets::{
+    Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, Wrap,
+};
 use ratatui::Frame;
 
 pub fn render_app(frame: &mut Frame, app: &mut App) {
@@ -111,7 +112,7 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
         .begin_symbol(Some("↑"))
         .end_symbol(Some("↓"));
 
-    let mut scrollbar_state = app.scrollbar_state.position(app.vertical_scroll);
+    let mut scrollbar_state = ScrollbarState::new(text.len()).position(app.vertical_scroll);
     let msg = Paragraph::new(text.clone())
         .block(
             Block::default()
@@ -122,7 +123,6 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
         .wrap(Wrap { trim: false });
 
     frame.render_widget(msg, rect);
-    info!("Now to render the scrollbar...?");
     frame.render_stateful_widget(
         scrollbar,
         rect.inner(&Margin {
