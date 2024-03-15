@@ -203,6 +203,10 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         KeyCode::Char('b') | KeyCode::Char('B') => app.idle(),
+                        KeyCode::Char('j') | KeyCode::Char('J') | KeyCode::Down => {
+                            app.scroll_down()
+                        }
+                        KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up => app.scroll_up(),
                         // KeyCode
                         _ => info!("Go baby go go!"),
                     }

@@ -173,6 +173,16 @@ impl App<'_> {
         }
         full_text
     }
+
+    pub fn scroll_down(&mut self) {
+        self.vertical_scroll += 1;
+    }
+
+    pub fn scroll_up(&mut self) {
+        if self.vertical_scroll > 0 {
+            self.vertical_scroll -= 1;
+        }
+    }
 }
 
 pub fn init_input_area<'a>() -> TextArea<'a> {
