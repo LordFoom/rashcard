@@ -30,6 +30,7 @@ pub struct App<'a> {
     pub prior_state: State,
     pub verbosity: u8,
     pub input_area: TextArea<'a>,
+    pub vertical_scroll_state: ScrollbarState,
     pub vertical_scroll: usize,
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
@@ -52,6 +53,7 @@ impl App<'_> {
             prior_state: State::Idling,
             verbosity: args.verbosity.clone(),
             input_area: TextArea::default(),
+            vertical_scroll_state: ScrollbarState::default(),
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
@@ -117,6 +119,9 @@ impl App<'_> {
     pub fn reset_scrollbar_state(&mut self) {
         //reset to the beginning bebe
         self.vertical_scroll = 0;
+        self.vertical_scroll_state = self
+            .vertical_scroll_state
+            .content_length(self.text_lines().len());
     }
 
     pub fn increment_flash_count(&mut self) {
@@ -176,12 +181,14 @@ impl App<'_> {
 
     pub fn scroll_down(&mut self) {
         self.vertical_scroll += 1;
+        self.vertical_scroll_state.position(self.vertical_scroll);
     }
 
     pub fn scroll_up(&mut self) {
         if self.vertical_scroll > 0 {
             self.vertical_scroll -= 1;
         }
+        self.vertical_scroll_state.position(self.vertical_scroll);
     }
 }
 
@@ -195,10 +202,6 @@ pub fn init_input_area<'a>() -> TextArea<'a> {
     ta
 }
 
-pub fn init_scrollbar_state() -> ScrollbarState {
-    ScrollbarState::new(0)
-}
-
 impl Default for App<'_> {
     fn default() -> Self {
         Self {
@@ -207,6 +210,7 @@ impl Default for App<'_> {
             state: State::Idling,
             verbosity: 0,
             input_area: init_input_area(),
+            vertical_scroll_state: ScrollbarState::default(),
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,

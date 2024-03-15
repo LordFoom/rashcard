@@ -112,7 +112,7 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
         .begin_symbol(Some("↑"))
         .end_symbol(Some("↓"));
 
-    let mut scrollbar_state = ScrollbarState::new(text.len()).position(app.vertical_scroll);
+    let mut scrollbar_state = app.vertical_scroll_state.clone();
     let msg = Paragraph::new(text.clone())
         .block(
             Block::default()
