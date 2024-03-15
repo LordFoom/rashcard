@@ -121,7 +121,8 @@ impl App<'_> {
         self.vertical_scroll = 0;
         self.vertical_scroll_state = self
             .vertical_scroll_state
-            .content_length(self.text_lines().len());
+            // .content_length(self.text_lines().len());
+            .content_length(100);
     }
 
     pub fn increment_flash_count(&mut self) {
@@ -181,14 +182,14 @@ impl App<'_> {
 
     pub fn scroll_down(&mut self) {
         self.vertical_scroll += 1;
-        self.vertical_scroll_state.position(self.vertical_scroll);
+        self.vertical_scroll_state = self.vertical_scroll_state.position(self.vertical_scroll);
     }
 
     pub fn scroll_up(&mut self) {
         if self.vertical_scroll > 0 {
             self.vertical_scroll -= 1;
         }
-        self.vertical_scroll_state.position(self.vertical_scroll);
+        self.vertical_scroll_state = self.vertical_scroll_state.position(self.vertical_scroll);
     }
 }
 
