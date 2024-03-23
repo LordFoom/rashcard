@@ -1,4 +1,4 @@
-use crate::app::{self, App};
+use crate::app::{State, App};
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Margin, Style};
 use ratatui::style::Modifier;
@@ -21,7 +21,7 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
 
     //render the top message
     let top_text = match app.state {
-        app::State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
+        State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
         _ => {
             "Welcome to Rashcard, the Rust Flashcard application
          [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit"
@@ -39,10 +39,10 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
     //now we do the main panel
 
     match app.state {
-        app::State::Idling => draw_placeholder(frame, main_display),
-        app::State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
-        app::State::AddFlashcard => display_add_flashcard(frame, main_display, app),
-        app::State::DisplaySavedPopup => {
+        State::Idling => draw_placeholder(frame, main_display),
+        State::ShowFlashcard => display_current_flashcard(frame, main_display, app),
+        State::AddFlashcard => display_add_flashcard(frame, main_display, app),
+        State::DisplaySavedPopup => {
             // info!("Saved! About to display the same");
             draw_saved_popup(frame).unwrap();
             app.close_popup_if_it_is_time();

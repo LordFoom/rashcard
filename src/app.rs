@@ -40,9 +40,17 @@ pub struct App<'a> {
     pub cards_displayed: usize,
 }
 
+#[derive(Debug)]
+pub enum DrawMode {
+    Forward,
+    Backward,
+    Random,
+}
+
 pub struct Timer {
     pub start: Instant,
     pub next_card_cycle: usize,
+    pub draw_mode: DrawMode
 }
 
 impl App<'_> {

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::{Select, State};
+use app::{Select, S[]tate};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -43,11 +43,12 @@ pub struct Args {
     ///Is there a markdown file to read text from?
     #[arg(short, long)]
     file: Option<String>,
-    ///Display random flashcard every N seconds
+    ///Display default random flashcard every N seconds
     #[arg(short, long)]
     timer: Option<usize>,
+    ///
     #[arg(short, long, requires("timer"))]
-    mode: Option<String>,
+    mode: Option<DrawMode>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
@@ -92,9 +93,11 @@ fn main() -> Result<()> {
     let mut maybe_timer = if let Some(t) = args.timer {
         let start = Instant::now();
         let next_card_cycle = t;
+        let mode = args.mode;
         let timer = Timer {
             start,
             next_card_cycle,
+            mode,
         };
         info!("We have a timer! {}s", t);
         Some(timer)
