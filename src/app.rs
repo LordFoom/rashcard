@@ -38,10 +38,11 @@ pub struct App<'a> {
     pub total_cards: usize,
     pub first_shown: bool,
     pub cards_displayed: usize,
+    pub draw_mode: FlashCardMode,
 }
 
-#[derive(Debug)]
-pub enum DrawMode {
+#[derive(clap::ValueEnum, Debug, Clone)]
+pub enum FlashCardMode {
     Forward,
     Backward,
     Random,
@@ -50,7 +51,7 @@ pub enum DrawMode {
 pub struct Timer {
     pub start: Instant,
     pub next_card_cycle: usize,
-    pub draw_mode: DrawMode
+    pub draw_mode: FlashCardMode,
 }
 
 impl App<'_> {
@@ -69,6 +70,11 @@ impl App<'_> {
             total_cards: 0,
             first_shown: false,
             cards_displayed: 0,
+            draw_mode: if let Some(mode) = args.mode.clone() {
+                mode
+            } else {
+                FlashCardMode::Random
+            },
         }
     }
 
@@ -81,10 +87,10 @@ impl App<'_> {
         self.state = State::DisplaySavedPopup;
     }
 
-    pub fn close_popup_if_it_is_time(&mut self) {
+    pub fn close_popup_if_it_is_time(&mut self, time: u128) {
         if let Some(inst) = self.popup_time {
             let time_since = inst.elapsed();
-            if time_since.as_millis() > 500 {
+            if time_since.as_millis() > time {
                 self.restore_prior_state();
             }
         }
@@ -227,6 +233,7 @@ impl Default for App<'_> {
             total_cards: 0,
             first_shown: false,
             cards_displayed: 0,
+            draw_mode: FlashCardMode::Random,
         }
     }
 }

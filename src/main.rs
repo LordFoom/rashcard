@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use app::{Select, S[]tate};
+use app::{FlashCardMode, Select, State};
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -46,9 +46,9 @@ pub struct Args {
     ///Display default random flashcard every N seconds
     #[arg(short, long)]
     timer: Option<usize>,
-    ///
-    #[arg(short, long, requires("timer"))]
-    mode: Option<DrawMode>,
+    ///Set display mode for timer: Forward, Backward, Random
+    #[arg(short, long, requires("timer"), value_enum)]
+    mode: Option<FlashCardMode>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
@@ -90,26 +90,34 @@ fn main() -> Result<()> {
         println!("Imported flashcards from {}", file);
         return Ok(());
     }
-    let mut maybe_timer = if let Some(t) = args.timer {
-        let start = Instant::now();
-        let next_card_cycle = t;
-        let mode = args.mode;
-        let timer = Timer {
-            start,
-            next_card_cycle,
-            mode,
-        };
-        info!("We have a timer! {}s", t);
-        Some(timer)
-    } else {
-        None
-    };
-
+    let mut maybe_timer = maybe_construct_timer(&args);
     let mut terminal = setup_terminal().context("setup failed")?;
     run(app, &conn, &mut maybe_timer, &mut terminal).context("failed running")?;
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
     unsetup_terminal(&mut terminal).context("unsetup failed")
+}
+
+fn maybe_construct_timer(args: &Args) -> Option<Timer> {
+    if let Some(t) = args.timer {
+        let start = Instant::now();
+        let next_card_cycle = t;
+        let draw_mode = if let Some(mode) = args.mode.clone() {
+            mode
+        } else {
+            FlashCardMode::Random
+        };
+
+        let timer = Timer {
+            start,
+            next_card_cycle,
+            draw_mode,
+        };
+        info!("We have a timer! {}s", t);
+        Some(timer)
+    } else {
+        None
+    }
 }
 
 fn setup_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>> {
@@ -151,7 +159,11 @@ fn run(
         //we want to flick through if we've been passed a timer
         if let Some(t) = maybe_timer {
             if t.start.elapsed().as_secs() > t.next_card_cycle as u64 {
-                show_random_flashcard(&mut app, conn)?;
+                match t.draw_mode {
+                    FlashCardMode::Forward => show_next_flashcard(&mut app, conn)?,
+                    FlashCardMode::Backward => show_prev_flashcard(&mut app, conn)?,
+                    FlashCardMode::Random => show_random_flashcard(&mut app, conn)?,
+                }
                 t.start = Instant::now();
             }
         }

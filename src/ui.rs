@@ -45,7 +45,7 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
         State::DisplaySavedPopup => {
             // info!("Saved! About to display the same");
             draw_saved_popup(frame).unwrap();
-            app.close_popup_if_it_is_time();
+            app.close_popup_if_it_is_time(500);
         }
     }
 
