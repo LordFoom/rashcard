@@ -1,4 +1,4 @@
-use crate::app::{State, App};
+use crate::app::{App, State};
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Margin, Style};
 use ratatui::style::Modifier;
@@ -24,7 +24,7 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
         State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
         _ => {
             "Welcome to Rashcard, the Rust Flashcard application
-         [N]ext | [R]andom | [P]revious | [A]dd | [Q]uit"
+         [N]ext | [R]andom | [P]revious | [A]dd | [D]elete | [Q]uit"
         }
     };
 

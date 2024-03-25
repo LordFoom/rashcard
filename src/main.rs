@@ -73,11 +73,10 @@ fn init_logging(level: u8) -> Result<()> {
 }
 
 ///TODO add ability to delete a flashcard
-///TODO Set timer mode (forward, backward, random)
 ///TODO Add open file dialog
 ///TODO add plugin framework for formats
 ///TODO convert readme reading into plugin
-/// Rash: obsolete : quickly effective
+/// Rash: obsolete definition : quickly effective
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
@@ -222,6 +221,9 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                             app.scroll_down()
                         }
                         KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up => app.scroll_up(),
+                        KeyCode::Char('d') | DeyCode::Char('D') => {
+                            maybe_delete_flashcard(app, conn)?
+                        }
                         // KeyCode
                         _ => info!("Go baby go go!"),
                     }
@@ -304,4 +306,8 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     app.increment_display_count();
     app.show_flash_card();
     Ok(())
+}
+
+fn maybe_delete_flashcard(app: &mut App, conn: &Connection) {
+    info!("Maybe deleting a flashcard!");
 }

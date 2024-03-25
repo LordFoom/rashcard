@@ -6,6 +6,8 @@ use rusqlite::{params, Connection};
 pub struct FlashCard {
     pub title: String,
     pub body: String,
+    //db id
+    pub id: usize,
 }
 
 pub fn default_connection() -> Result<Connection> {
@@ -51,11 +53,13 @@ pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> 
 
 pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCard>> {
     info!("This is the offset for next flashcard: {}", offset);
-    let mut qry = conn.prepare("SELECT title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
+    let mut qry =
+        conn.prepare("SELECT id, title, body FROM flashcard ORDER BY id LIMIT 1 OFFSET ?")?;
     let flashcards = qry.query_map(params![offset], |row| {
         Ok(FlashCard {
-            title: row.get(0)?,
-            body: row.get(1)?,
+            id: row.get(0)?,
+            title: row.get(1)?,
+            body: row.get(2)?,
         })
     })?;
 
@@ -70,4 +74,8 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
     }
     //
     Ok(flashcard)
+}
+
+pub fn delete_flashcard() -> Result<()> {
+    Ok(())
 }
