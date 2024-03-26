@@ -34,6 +34,7 @@ pub struct App<'a> {
     pub vertical_scroll: usize,
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
+    pub current_flashcard_id: usize,
     pub current_flash_text: String,
     pub total_cards: usize,
     pub first_shown: bool,
@@ -66,6 +67,7 @@ impl App<'_> {
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
+            current_flashcard_id: 0,
             current_flash_text: String::new(),
             total_cards: 0,
             first_shown: false,
@@ -205,6 +207,10 @@ impl App<'_> {
         }
         self.vertical_scroll_state = self.vertical_scroll_state.position(self.vertical_scroll);
     }
+
+    pub fn has_flashcards(&self) -> bool {
+        self.total_cards > 0
+    }
 }
 
 pub fn init_input_area<'a>() -> TextArea<'a> {
@@ -229,6 +235,7 @@ impl Default for App<'_> {
             vertical_scroll: 0,
             popup_time: None,
             current_flashcard_number: 0,
+            current_flashcard_id: 0,
             current_flash_text: String::new(),
             total_cards: 0,
             first_shown: false,

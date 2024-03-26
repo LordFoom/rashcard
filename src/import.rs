@@ -48,6 +48,7 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
         flash_card_title.push('\n');
         flash_card_title.push_str(&author);
         let fc = FlashCard {
+            id: 0, //this will be ignored
             title: flash_card_title,
             body,
         };

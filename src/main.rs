@@ -221,7 +221,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                             app.scroll_down()
                         }
                         KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up => app.scroll_up(),
-                        KeyCode::Char('d') | DeyCode::Char('D') => {
+                        KeyCode::Char('d') | KeyCode::Char('D') => {
                             maybe_delete_flashcard(app, conn)?
                         }
                         // KeyCode
@@ -285,12 +285,11 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     info!("Current flash number: {}", offset);
     info!("State: {:?}", state);
     let txt = if let Some(flash) = db::next_flashcard(offset, conn)? {
-        //we'll append everything to the title and bring it back
         let mut text = flash.title;
         let body = flash.body;
         text.push('\n');
         text.push_str(&body);
-        //move onto the next flashcard
+        app.current_flashcard_id = flash.id;
         text
     } else {
         app.reset_count();
@@ -308,6 +307,16 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     Ok(())
 }
 
-fn maybe_delete_flashcard(app: &mut App, conn: &Connection) {
+fn maybe_delete_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     info!("Maybe deleting a flashcard!");
+    let curr_id = app.current_flashcard_id;
+    if app.has_flashcards() {
+        //di
+        // db::delete_flashcard(app.current_flashcard_id, conn);
+        // app.total_cards -= 1;
+    }
+    info!("Deleted flashcard with id {}", curr_id);
+    show_prev_flashcard(app, conn)?;
+
+    Ok(())
 }
