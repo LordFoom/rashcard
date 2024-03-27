@@ -77,9 +77,6 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
 }
 
 pub fn delete_flashcard(fc_id: usize, conn: &Connection) -> Result<()> {
-    conn.execute(
-        "DELETE from flashcard where id = ?1)",
-        &[&fc_id.to_string()],
-    )?;
+    conn.execute("DELETE from flashcard where id = ?1", &[&fc_id.to_string()])?;
     Ok(())
 }

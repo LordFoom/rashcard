@@ -311,9 +311,8 @@ fn maybe_delete_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     info!("Maybe deleting a flashcard!");
     let curr_id = app.current_flashcard_id;
     if app.has_flashcards() {
-        //di
-        // db::delete_flashcard(app.current_flashcard_id, conn);
-        // app.total_cards -= 1;
+        db::delete_flashcard(app.current_flashcard_id, conn)?;
+        app.total_cards -= 1;
     }
     info!("Deleted flashcard with id {}", curr_id);
     show_prev_flashcard(app, conn)?;
