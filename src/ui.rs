@@ -47,6 +47,7 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
             draw_saved_popup(frame).unwrap();
             app.close_popup_if_it_is_time(500);
         }
+        State::DisplayDeletePopup => draw_delete_popup(f),
     }
 
     //down at the SIDE-BAR, SIDE-BAR, SIDE-BAR!!
@@ -86,6 +87,10 @@ fn draw_placeholder(frame: &mut Frame, rect: Rect) {
 
 fn draw_saved_popup(f: &mut Frame) -> anyhow::Result<()> {
     display_popup("Saved", f)
+}
+
+fn draw_delete_popup(frame: &mut Frame) {
+    d
 }
 
 fn display_popup(msg: &str, f: &mut Frame) -> anyhow::Result<()> {

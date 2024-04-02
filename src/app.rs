@@ -16,6 +16,7 @@ pub enum State {
     ShowFlashcard,
     AddFlashcard,
     DisplaySavedPopup,
+    DisplayDeletePopup,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Select {
@@ -83,10 +84,13 @@ impl App<'_> {
     ///Sets up the app to show the saved popup
     ///This can and should be generalized
     pub fn display_saved_popup(&mut self) {
-        self.prior_state = self.state;
+        self.set_state(State::DisplaySavedPopup);
         let now = Instant::now();
         self.popup_time = Some(now);
-        self.state = State::DisplaySavedPopup;
+    }
+
+    pub fn display_confirm_delete_popup(&mut self) {
+        self.set_state(State::DisplayDeletePopup);
     }
 
     pub fn close_popup_if_it_is_time(&mut self, time: u128) {
