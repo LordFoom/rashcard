@@ -229,6 +229,22 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     }
                 }
             }
+            State::DisplaySavedPopup => {
+                if let Event::Key(key) = event::read().context("event read failed")?.into() {
+                    match key.code {
+                        KeyCode::Char('y') | KeyCode::Char('Y') => {
+                            actually_delete_flashcard(app, conn)?
+                        }
+                        KeyCode::Char('n') | KeyCode::Char('N') => {
+                            info!("Decided not to delete flashcard");
+                            app.restore_prior_state();
+                        }
+                        //do nothing in all other cases
+                        _ => {}
+                    }
+                }
+            }
+            //all the other states don't need no stinking input
             _ => {}
         }
     }
@@ -307,8 +323,19 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     Ok(())
 }
 
+///This will cause a "Really delete" modal to display
 fn maybe_delete_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
     info!("Maybe deleting a flashcard!");
+    if app.has_flashcards() {
+        //show the confirm delete dialog
+        app.start_delete();
+    }
+
+    Ok(())
+}
+
+fn actually_delete_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    info!("Actually going to delete a flashcard!");
     let curr_id = app.current_flashcard_id;
     if app.has_flashcards() {
         //show the confirm delete dialog

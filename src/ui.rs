@@ -1,10 +1,9 @@
 use crate::app::{App, State};
+use anyhow::Result;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Margin, Style};
 use ratatui::style::Modifier;
-use ratatui::widgets::{
-    Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, Wrap,
-};
+use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, Wrap};
 use ratatui::Frame;
 
 pub fn render_app(frame: &mut Frame, app: &mut App) {
@@ -47,7 +46,7 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
             draw_saved_popup(frame).unwrap();
             app.close_popup_if_it_is_time(500);
         }
-        State::DisplayDeletePopup => draw_delete_popup(f),
+        State::DisplayDeletePopup => draw_delete_popup(frame, app).unwrap(),
     }
 
     //down at the SIDE-BAR, SIDE-BAR, SIDE-BAR!!
@@ -85,12 +84,22 @@ fn draw_placeholder(frame: &mut Frame, rect: Rect) {
     frame.render_widget(msg, rect);
 }
 
-fn draw_saved_popup(f: &mut Frame) -> anyhow::Result<()> {
+fn draw_saved_popup(f: &mut Frame) -> Result<()> {
     display_popup("Saved", f)
 }
 
-fn draw_delete_popup(frame: &mut Frame) {
-    d
+fn draw_delete_popup(f: &mut Frame, app: &mut App) -> Result<()> {
+    let txt = r"Really delete this flashcard?
+    [Y]es                     [C]ancel";
+    let msg = Paragraph::new(txt).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::DarkGray)),
+    );
+
+    let rect = centered_rect(20, 20, f.size());
+    f.render_widget(msg, rect);
+    Ok(())
 }
 
 fn display_popup(msg: &str, f: &mut Frame) -> anyhow::Result<()> {

@@ -17,6 +17,7 @@ pub enum State {
     AddFlashcard,
     DisplaySavedPopup,
     DisplayDeletePopup,
+    DeleteFlashCard,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Select {
@@ -214,6 +215,10 @@ impl App<'_> {
 
     pub fn has_flashcards(&self) -> bool {
         self.total_cards > 0
+    }
+
+    pub fn start_delete(&mut self) {
+        self.set_state(State::DeleteFlashCard);
     }
 }
 
