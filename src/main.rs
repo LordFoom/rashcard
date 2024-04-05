@@ -229,7 +229,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                     }
                 }
             }
-            State::DisplaySavedPopup => {
+            State::DisplayDeletePopup => {
                 if let Event::Key(key) = event::read().context("event read failed")?.into() {
                     match key.code {
                         KeyCode::Char('y') | KeyCode::Char('Y') => {

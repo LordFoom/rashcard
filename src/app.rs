@@ -17,7 +17,7 @@ pub enum State {
     AddFlashcard,
     DisplaySavedPopup,
     DisplayDeletePopup,
-    DeleteFlashCard,
+    // DeleteFlashCard,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Select {
@@ -218,7 +218,7 @@ impl App<'_> {
     }
 
     pub fn start_delete(&mut self) {
-        self.set_state(State::DeleteFlashCard);
+        self.set_state(State::DisplayDeletePopup);
     }
 }
 
