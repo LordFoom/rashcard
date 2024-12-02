@@ -9,10 +9,10 @@ edition = "2021"
 anyhow = "1.0.75"
 clap = { version = "4.4.8", features = ["derive"] }
 crossterm = "0.27.0"
-ratatui = "0.24"
+ratatui = "0.29"
 log4rs = "1.2.0"
 log = "0.4"
 rusqlite = { version = "0.30.0", features = ["bundled"] }
-tui-textarea = "0.4.0"
+tui-textarea = "0.4"
 tracing-appender = "0.2.3"
 rand = "0.8.5"

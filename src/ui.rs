@@ -1,38 +1,39 @@
 use crate::app::{App, State};
 use anyhow::Result;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use log::info;
+use ratatui::layout::{Alignment, Constraint, Layout, Rect};
 use ratatui::prelude::{Color, Margin, Style};
 use ratatui::style::Modifier;
 use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, Wrap};
 use ratatui::Frame;
 
 pub fn render_app(frame: &mut Frame, app: &mut App) {
-    let size = frame.size();
+    let size = frame.area();
     //we make some rows
-    let rows = Layout::new()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
-        .split(size);
-    let cols = Layout::new()
-        .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
-        .direction(Direction::Horizontal)
-        .split(rows[1]);
+    let rows =
+        Layout::vertical([Constraint::Percentage(20), Constraint::Percentage(80)]).split(size);
+    let cols =
+        Layout::horizontal([Constraint::Percentage(80), Constraint::Percentage(20)]).split(rows[1]);
 
     //render the top message
     let top_text = match app.state {
         State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
-        _ => {
+        _ => &format!(
             "Welcome to Rashcard, the Rust Flashcard application
-         [N]ext | [R]andom | [P]revious | [A]dd | [D]elete | [Q]uit"
-        }
+            [N]ext | [R]andom | [P]revious | [A]dd | [D]elete | Cop[Y] | [Q]uit",
+        ),
     };
 
-    let msg = Paragraph::new(top_text).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Yellow)),
-    );
+    let msg = Paragraph::new(top_text)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(Color::Yellow)),
+        )
+        .wrap(Wrap { trim: true })
+        .alignment(Alignment::Left);
 
+    info!("Top text: {}", top_text);
     frame.render_widget(msg, rows[0]);
     let main_display = cols[0];
     //now we do the main panel
@@ -139,7 +140,7 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     frame.render_widget(msg, rect);
     frame.render_stateful_widget(
         scrollbar,
-        rect.inner(&Margin {
+        rect.inner(Margin {
             //inside the block
             vertical: 1,
             horizontal: 0,
@@ -151,23 +152,19 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
 ///Create a 'centered' rect using percentage
 fn centered_rect(h: u16, v: u16, rect: Rect) -> Rect {
     //cut into 3 vertical rows
-    let layout = Layout::new()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage((100 - v) / 2),
-            Constraint::Percentage(v),
-            Constraint::Percentage((100 - v) / 2),
-        ])
-        .split(rect);
+    let layout = Layout::vertical([
+        Constraint::Percentage((100 - v) / 2),
+        Constraint::Percentage(v),
+        Constraint::Percentage((100 - v) / 2),
+    ])
+    .split(rect);
 
     //now we split the middle vertical block into 3 columns
     //and we return the middle column
-    Layout::new()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage((100 - h) / 2),
-            Constraint::Percentage(h),
-            Constraint::Percentage((100 - h) / 2),
-        ])
-        .split(layout[1])[1]
+    Layout::horizontal([
+        Constraint::Percentage((100 - h) / 2),
+        Constraint::Percentage(h),
+        Constraint::Percentage((100 - h) / 2),
+    ])
+    .split(layout[1])[1]
 }
