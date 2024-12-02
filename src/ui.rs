@@ -98,7 +98,7 @@ fn draw_delete_popup(f: &mut Frame) -> Result<()> {
             .style(Style::default().fg(Color::DarkGray)),
     );
 
-    let rect = centered_rect(20, 20, f.size());
+    let rect = centered_rect(20, 20, f.area());
     f.render_widget(msg, rect);
     Ok(())
 }
@@ -110,7 +110,7 @@ fn display_popup(msg: &str, f: &mut Frame) -> anyhow::Result<()> {
             .style(Style::default().fg(Color::DarkGray)),
     );
 
-    let rect = centered_rect(20, 20, f.size());
+    let rect = centered_rect(20, 20, f.area());
     f.render_widget(msg, rect);
     Ok(())
 }
