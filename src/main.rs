@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use app::{FlashCardMode, Select, State};
+use arboard::Clipboard;
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -217,12 +218,18 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         KeyCode::Char('p') | KeyCode::Char('P') => show_prev_flashcard(app, conn)?,
                         KeyCode::Char('f') | KeyCode::Char('F') => app.flip_flashcard(),
                         KeyCode::Char('b') | KeyCode::Char('B') => app.idle(),
-                        KeyCode::Char('j') | KeyCode::Char('J') | KeyCode::Down => {
-                            app.scroll_down()
+                        KeyCode::Char('j')
+                        | KeyCode::Char('J')
+                        | KeyCode::Down
+                        | KeyCode::PageDown => app.scroll_down(),
+                        KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up | KeyCode::PageUp => {
+                            app.scroll_up()
                         }
-                        KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up => app.scroll_up(),
                         KeyCode::Char('d') | KeyCode::Char('D') => {
                             maybe_delete_flashcard(app, conn)?
+                        }
+                        KeyCode::Char('y') | KeyCode::Char('Y') => {
+                            copy_flashcard_to_clipboard(app)?
                         }
                         // KeyCode
                         _ => info!("Go baby go go!"),
@@ -247,6 +254,17 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
             //all the other states don't need no stinking input
             _ => {}
         }
+    }
+    Ok(())
+}
+
+///Copy the currently displayed flashcard to the clipboard
+///VI till I die
+fn copy_flashcard_to_clipboard(app: &mut App) -> Result<()> {
+    if app.has_flashcards() {
+        let mut clip = Clipboard::new()?;
+        let txt = app.current_flash_text.clone();
+        clip.set_text(txt)?;
     }
     Ok(())
 }
