@@ -16,3 +16,4 @@ rusqlite = { version = "0.30.0", features = ["bundled"] }
 tui-textarea = "0.4"
 tracing-appender = "0.2.3"
 rand = "0.8.5"
+arboard = "3.4.1"
