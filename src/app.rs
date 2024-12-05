@@ -42,6 +42,8 @@ pub struct App<'a> {
     pub first_shown: bool,
     pub cards_displayed: usize,
     pub draw_mode: FlashCardMode,
+    //we want to visually signal eg a copy
+    pub visual_flicker: bool,
 }
 
 #[derive(clap::ValueEnum, Debug, Clone)]
@@ -79,6 +81,7 @@ impl App<'_> {
             } else {
                 FlashCardMode::Random
             },
+            visual_flicker: false,
         }
     }
 
@@ -250,6 +253,7 @@ impl Default for App<'_> {
             first_shown: false,
             cards_displayed: 0,
             draw_mode: FlashCardMode::Random,
+            visual_flicker: false,
         }
     }
 }

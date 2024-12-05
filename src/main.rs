@@ -265,6 +265,7 @@ fn copy_flashcard_to_clipboard(app: &mut App) -> Result<()> {
         let mut clip = Clipboard::new()?;
         let txt = app.current_flash_text.clone();
         clip.set_text(txt)?;
+        app.visual_flicker = true;
     }
     Ok(())
 }

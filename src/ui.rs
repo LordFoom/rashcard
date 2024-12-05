@@ -1,3 +1,6 @@
+use std::thread;
+use std::time::Duration;
+
 use crate::app::{App, State};
 use anyhow::Result;
 use log::info;
@@ -128,6 +131,14 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
         .end_symbol(Some("↓"));
 
     let mut scrollbar_state = app.vertical_scroll_state.clone();
+
+    //we want a flicker if we eg copy
+    let text = if app.visual_flicker {
+        "  ".to_string()
+    } else {
+        app.current_flash_text.clone()
+    };
+
     let msg = Paragraph::new(text.clone())
         .block(
             Block::default()
@@ -146,7 +157,12 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
             horizontal: 0,
         }),
         &mut scrollbar_state,
-    )
+    );
+    //pause for a moment if we are flicker, to do the flick
+    if app.visual_flicker {
+        thread::sleep(Duration::from_millis(250));
+        app.visual_flicker = false;
+    }
 }
 
 ///Create a 'centered' rect using percentage
