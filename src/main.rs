@@ -50,6 +50,8 @@ pub struct Args {
     ///Set display mode for timer: Forward, Backward, Random
     #[arg(short, long, requires("timer"), value_enum)]
     mode: Option<FlashCardMode>,
+    //A sound file to play when a timer reaches the end
+    sound: Option<String>,
 }
 
 fn init_logging(level: u8) -> Result<()> {
