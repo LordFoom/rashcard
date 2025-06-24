@@ -2,6 +2,16 @@ use crate::db::{save_flashcard_object, FlashCard};
 use anyhow::Result;
 use rusqlite::Connection;
 
+///Import a file using the Yomu export format
+///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
+///number       
+pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
+    let file_contents = std::fs::read_to_string(path);
+
+    extract_yomu_flashcards(file_contents)
+}
+
+pub fn extract_yomu_flashcards(file_contents: String) {}
 ///Import a file into the flashcards using the ReadEra exported format
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
 ///number

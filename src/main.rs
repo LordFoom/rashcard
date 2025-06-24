@@ -87,6 +87,7 @@ fn main() -> Result<()> {
     init_table(&conn)?;
     if let Some(file) = args.file {
         import_read_era_quotes(&file, &conn)?;
+        import_yomu_quotes(&file, &conn);
         println!("Imported flashcards from {}", file);
         return Ok(());
     }
