@@ -6,12 +6,22 @@ use rusqlite::Connection;
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
 ///number       
 pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
-    let file_contents = std::fs::read_to_string(path);
+    let file_contents = std::fs::read_to_string(fp);
 
     extract_yomu_flashcards(file_contents)
 }
 
-pub fn extract_yomu_flashcards(file_contents: String) {}
+pub fn extract_yomu_flashcards(file_contents: String) -> Result<Vec<FlashCard>> {
+    let mut title = String::new();
+    let mut author = String::new();
+
+    let mut text = file_contents.lines().enumerate();
+
+    //first line is the title preceded with a #
+
+    //end of first line has the author, wrapped in ()
+}
+
 ///Import a file into the flashcards using the ReadEra exported format
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
 ///number
