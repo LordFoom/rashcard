@@ -1,3 +1,5 @@
+use std::io::{BufRead, BufReader};
+
 use crate::db::{save_flashcard_object, FlashCard};
 use anyhow::Result;
 use rusqlite::Connection;
@@ -6,20 +8,42 @@ use rusqlite::Connection;
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
 ///number       
 pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
+    let file = std::fs::File::open(fp)?;
+    let mut reader = BufReader::new(file);
+
+    let mut first_line = String::new();
+    reader.read_line(&mut first_line)?;
+    let (title, author) = extract_yomu_title_author(&first_line);
     let file_contents = std::fs::read_to_string(fp);
 
     extract_yomu_flashcards(file_contents)
 }
 
-pub fn extract_yomu_flashcards(file_contents: String) -> Result<Vec<FlashCard>> {
+pub fn extract_yomu_title_author(line: &str) -> (String, String) {
+    // # An Inquiry into the Nature and Causes of the Wealth of Nations (Adam Smith)
     let mut title = String::new();
     let mut author = String::new();
+    line.replace("#", "")
+        .split('(')
+        .enumerate()
+        .for_each(|(idx, part)| {
+            if idx == 0 {
+                title = part.trim().to_owned();
+            } else {
+                //only expect two items
+                author = part.replace(")", "").trim().to_owned()
+            }
+        });
+    (title, author)
+}
 
-    let mut text = file_contents.lines().enumerate();
+pub fn extract_yomu_flashcards(file_contents: String) -> Result<Vec<FlashCard>> {
+    // let mut text = file_contents.lines().enumerate().for_each(f)
 
     //first line is the title preceded with a #
 
     //end of first line has the author, wrapped in ()
+    //
 }
 
 ///Import a file into the flashcards using the ReadEra exported format
