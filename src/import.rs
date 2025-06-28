@@ -1,4 +1,4 @@
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read};
 
 use crate::db::{save_flashcard_object, FlashCard};
 use anyhow::Result;
@@ -14,7 +14,8 @@ pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let mut first_line = String::new();
     reader.read_line(&mut first_line)?;
     let (title, author) = extract_yomu_title_author(&first_line);
-    let file_contents = std::fs::read_to_string(fp);
+    let mut file_contents = String::new();
+    reader.read_to_string(&mut file_contents)?;
 
     extract_yomu_flashcards(file_contents)
 }
