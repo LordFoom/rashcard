@@ -17,7 +17,8 @@ pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let mut file_contents = String::new();
     reader.read_to_string(&mut file_contents)?;
 
-    extract_yomu_flashcards(file_contents)
+    if let Some(flash_cards) = extract_yomu_flashcards(&title, file_contents) {}
+    Ok(())
 }
 
 pub fn extract_yomu_title_author(line: &str) -> (String, String) {
@@ -38,13 +39,24 @@ pub fn extract_yomu_title_author(line: &str) -> (String, String) {
     (title, author)
 }
 
-pub fn extract_yomu_flashcards(file_contents: String) -> Result<Vec<FlashCard>> {
-    // let mut text = file_contents.lines().enumerate().for_each(f)
-
-    //first line is the title preceded with a #
-
-    //end of first line has the author, wrapped in ()
-    //
+pub fn extract_yomu_flashcards(title: &str, file_contents: String) -> Result<Vec<FlashCard>> {
+    let flash_cards = file_contents
+        .split("---")
+        .map(|part| {
+            let body = part
+                .lines()
+                .filter(|line| line.starts_with(">"))
+                .map(|line| line.trim_start_matches(">"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            FlashCard {
+                id: 0,
+                title: title.to_owned(),
+                body,
+            }
+        })
+        .collect::<Vec<FlashCard>>();
+    Ok(flash_cards)
 }
 
 ///Import a file into the flashcards using the ReadEra exported format
