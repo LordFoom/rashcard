@@ -17,7 +17,9 @@ pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let mut file_contents = String::new();
     reader.read_to_string(&mut file_contents)?;
 
-    if let Some(flash_cards) = extract_yomu_flashcards(&title, file_contents) {}
+    for fc in extract_yomu_flashcards(&title, file_contents)? {
+        save_flashcard_object(&fc, conn)?;
+    }
     Ok(())
 }
 
