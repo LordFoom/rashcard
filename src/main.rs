@@ -9,7 +9,7 @@ use crossterm::{
     ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
-use import::import_read_era_quotes;
+use import::{import_read_era_quotes, import_yomu_quotes};
 use log::{info, LevelFilter};
 use ratatui::prelude::*;
 use rusqlite::Connection;
@@ -86,8 +86,8 @@ fn main() -> Result<()> {
     let conn = default_connection().context("failed to get sql connection")?;
     init_table(&conn)?;
     if let Some(file) = args.file {
-        import_read_era_quotes(&file, &conn)?;
-        import_yomu_quotes(&file, &conn);
+        // import_read_era_quotes(&file, &conn)?;
+        import_yomu_quotes(&file, &conn)?;
         println!("Imported flashcards from {}", file);
         return Ok(());
     }
