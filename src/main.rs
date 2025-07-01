@@ -9,7 +9,7 @@ use crossterm::{
     ExecutableCommand,
 };
 use db::{default_connection, fetch_initial_flash_card_count};
-use import::{import_read_era_quotes, import_yomu_quotes};
+use import::import_yomu_quotes;
 use log::{info, LevelFilter};
 use ratatui::prelude::*;
 use rusqlite::Connection;
@@ -81,7 +81,7 @@ fn init_logging(level: u8) -> Result<()> {
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
-    init_logging(app.verbosity.clone())?;
+    init_logging(app.verbosity)?;
 
     let conn = default_connection().context("failed to get sql connection")?;
     init_table(&conn)?;
@@ -128,9 +128,7 @@ fn setup_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>> {
     stdout
         .execute(EnterAlternateScreen)
         .context("unable to enter alternate screen")?;
-    let term = Terminal::new(CrosstermBackend::new(stdout)).context("unable to setup terminal");
-    // info!("Terminal setup");
-    term
+    Terminal::new(CrosstermBackend::new(stdout)).context("unable to setup terminal")
 }
 
 fn unsetup_terminal(term: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()> {
@@ -204,7 +202,6 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                 }
                 input => {
                     app.input_area.input(input);
-                    ()
                 }
             },
             State::ShowFlashcard | State::Idling => {
@@ -238,7 +235,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                 }
             }
             State::DisplayDeletePopup => {
-                if let Event::Key(key) = event::read().context("event read failed")?.into() {
+                if let Event::Key(key) = event::read().context("event read failed")? {
                     match key.code {
                         KeyCode::Char('y') | KeyCode::Char('Y') => {
                             actually_delete_flashcard(app, conn)?

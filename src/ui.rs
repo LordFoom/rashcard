@@ -21,10 +21,10 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
     //render the top message
     let top_text = match app.state {
         State::AddFlashcard => "Ctrl+s to save, Ctrl+b to go back",
-        _ => &format!(
+        _ => {
             "Welcome to Rashcard, the Rust Flashcard application
-            [N]ext | [R]andom | [P]revious | [A]dd | [D]elete | Cop[Y] | [Q]uit",
-        ),
+            [N]ext | [R]andom | [P]revious | [A]dd | [D]elete | Cop[Y] | [Q]uit"
+        }
     };
 
     let msg = Paragraph::new(top_text)
@@ -125,12 +125,11 @@ fn display_add_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
 }
 
 fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
-    let text = &app.text_lines();
     let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
         .begin_symbol(Some("↑"))
         .end_symbol(Some("↓"));
 
-    let mut scrollbar_state = app.vertical_scroll_state.clone();
+    let mut scrollbar_state = app.vertical_scroll_state;
 
     //we want a flicker if we eg copy
     let text = if app.visual_flicker {

@@ -14,10 +14,11 @@ pub fn import_yomu_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let mut first_line = String::new();
     reader.read_line(&mut first_line)?;
     let (title, author) = extract_yomu_title_author(&first_line);
+    let title_with_author = format!("{}\n{}\n", title, author);
     let mut file_contents = String::new();
     reader.read_to_string(&mut file_contents)?;
 
-    for fc in extract_yomu_flashcards(&title, file_contents)? {
+    for fc in extract_yomu_flashcards(&title_with_author, file_contents)? {
         save_flashcard_object(&fc, conn)?;
     }
     Ok(())
@@ -67,7 +68,7 @@ pub fn extract_yomu_flashcards(title: &str, file_contents: String) -> Result<Vec
 pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let file_contents = std::fs::read_to_string(fp)?;
     //now we parse the file contents
-    extract_flash_cards(file_contents)?
+    extract_read_era_flash_cards(file_contents)?
         .into_iter()
         .try_for_each(|flashcard| -> Result<()> { save_flashcard_object(&flashcard, conn) })?;
 
@@ -75,7 +76,7 @@ pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
 }
 
 ///Take readera style exported notes and extract them as flashcard objects
-fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
+fn extract_read_era_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
     let mut title = String::new();
     let mut author = String::new();
 
@@ -117,7 +118,8 @@ fn extract_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
 }
 
 mod test {
-    use crate::import::extract_flash_cards;
+    #[allow(unused_imports)]
+    use crate::import::extract_read_era_flash_cards;
 
     #[test]
     pub fn test_extract_flash_cards() {
@@ -137,7 +139,7 @@ Sevenslurring
 Underscarring
 --"
         .to_string();
-        let flashcards = extract_flash_cards(text).unwrap();
+        let flashcards = extract_read_era_flash_cards(text).unwrap();
         assert_eq!(3, flashcards.len());
         println!("flashcards! {:?}", flashcards);
     }

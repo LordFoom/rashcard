@@ -65,7 +65,7 @@ impl App<'_> {
             running: true,
             state: State::Idling,
             prior_state: State::Idling,
-            verbosity: args.verbosity.clone(),
+            verbosity: args.verbosity,
             input_area: TextArea::default(),
             vertical_scroll_state: ScrollbarState::default(),
             vertical_scroll: 0,
@@ -109,9 +109,7 @@ impl App<'_> {
     ///Restores the state before the current one,
     ///while making the current on the prior one
     pub fn restore_prior_state(&mut self) {
-        let state = self.state;
-        self.state = self.prior_state;
-        self.prior_state = state;
+        std::mem::swap(&mut self.state, &mut self.prior_state);
         self.popup_time = None
     }
 

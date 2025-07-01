@@ -12,7 +12,7 @@ pub struct FlashCard {
 
 pub fn default_connection() -> Result<Connection> {
     let conn = Connection::open("./.rashcard.db")?;
-    return Ok(conn);
+    Ok(conn)
 }
 
 pub fn init_table(conn: &Connection) -> Result<()> {
@@ -45,7 +45,7 @@ pub fn save_flashcard_object(fc: &FlashCard, conn: &Connection) -> Result<()> {
 pub fn save_flashcard(title: &str, body: &str, conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT INTO flashcard(title, body) values (?1, ?2)",
-        &[title, body],
+        [title, body],
     )?;
 
     Ok(())
@@ -66,7 +66,7 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
     let mut flashcard = None;
     //should only be one in here
     for maybe_fc in flashcards {
-        if let None = flashcard {
+        if flashcard.is_none() {
             flashcard = Some(maybe_fc.unwrap());
         } else {
             bail!("Expected only 1 flashcard, found at least 2");
@@ -77,6 +77,6 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
 }
 
 pub fn delete_flashcard(fc_id: usize, conn: &Connection) -> Result<()> {
-    conn.execute("DELETE from flashcard where id = ?1", &[&fc_id.to_string()])?;
+    conn.execute("DELETE from flashcard where id = ?1", [&fc_id.to_string()])?;
     Ok(())
 }
