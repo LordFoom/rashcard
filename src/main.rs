@@ -73,10 +73,10 @@ fn init_logging(level: u8) -> Result<()> {
     Ok(())
 }
 
-///TODO add ability to delete a flashcard
 ///TODO Add open file dialog
 ///TODO add plugin framework for formats
 ///TODO convert readme reading into plugin
+///TODO search through cards
 /// Rash: obsolete definition : quickly effective
 fn main() -> Result<()> {
     let args = Args::parse();
