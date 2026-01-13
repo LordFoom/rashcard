@@ -1,1 +1,6 @@
 /target
+*db
+*log
+*bak
+*original
+*new
