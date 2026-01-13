@@ -17,7 +17,6 @@ pub enum State {
     AddFlashcard,
     DisplaySavedPopup,
     DisplayDeletePopup,
-    // DeleteFlashCard,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Select {
@@ -42,8 +41,10 @@ pub struct App<'a> {
     pub first_shown: bool,
     pub cards_displayed: usize,
     pub draw_mode: FlashCardMode,
-    //we want to visually signal eg a copy
+    ///we want to send a visually signal eg a copy
     pub visual_flicker: bool,
+    /// Record of flashcards that have been displayed
+    pub flashcard_number_history: Vec<usize>,
 }
 
 #[derive(clap::ValueEnum, Debug, Clone)]
@@ -82,6 +83,7 @@ impl App<'_> {
                 FlashCardMode::Random
             },
             visual_flicker: false,
+            flashcard_number_history: vec![],
         }
     }
 
@@ -147,6 +149,7 @@ impl App<'_> {
             .content_length(100);
     }
 
+    pub fn store_flash_count_histor(&mut self) {}
     pub fn increment_flash_count(&mut self) {
         self.current_flashcard_number += 1;
         if self.current_flashcard_number == self.total_cards {
@@ -192,7 +195,7 @@ impl App<'_> {
     }
 
     ///A vec of lines for the current flashcard
-    pub fn text_lines(&self) -> Vec<Line> {
+    pub fn text_lines<'a>(&'a self) -> Vec<Line<'a>> {
         let mut full_text = Vec::new();
 
         for line in self.current_flash_text.split('\n') {
@@ -252,6 +255,7 @@ impl Default for App<'_> {
             cards_displayed: 0,
             draw_mode: FlashCardMode::Random,
             visual_flicker: false,
+            flashcard_number_history: vec![],
         }
     }
 }
