@@ -78,6 +78,8 @@ fn init_logging(level: u8) -> Result<()> {
 ///TODO convert readme reading into plugin
 ///TODO search through cards
 /// Rash: obsolete definition : quickly effective
+/// TODO keep list of which cards have been shown, to allow forward and backward navigation
+/// TODO show list of "collections"
 fn main() -> Result<()> {
     let args = Args::parse();
     let app = App::from_arguments(&args);
