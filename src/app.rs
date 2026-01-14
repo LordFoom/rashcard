@@ -149,34 +149,41 @@ impl App<'_> {
             .content_length(100);
     }
 
-    pub fn store_flash_count_histor(&mut self) {}
+    /// Sets the current flashcard number and records it in history
+    fn set_current_flashcard(&mut self, index: usize) {
+        self.current_flashcard_number = index;
+        self.flashcard_number_history.push(index);
+    }
+
     pub fn increment_flash_count(&mut self) {
-        self.current_flashcard_number += 1;
-        if self.current_flashcard_number == self.total_cards {
-            self.current_flashcard_number = 0;
-        }
+        let next = (self.current_flashcard_number + 1) % self.total_cards;
+        self.set_current_flashcard(next);
     }
 
     pub fn decrement_flash_count(&mut self) {
-        if self.current_flashcard_number == 0 {
-            self.current_flashcard_number = self.total_cards - 1
+        let next = if self.current_flashcard_number == 0 {
+            self.total_cards - 1
         } else {
-            self.current_flashcard_number -= 1;
-        }
+            self.current_flashcard_number - 1
+        };
+        // Or: (self.current_flashcard_number + self.total_cards - 1) % self.total_cards
+        self.set_current_flashcard(next);
     }
 
     pub fn randomize_flash_count(&mut self) {
-        let mut rng = rand::thread_rng();
+        if self.total_cards <= 1 {
+            return; // Nothing to randomize
+        }
 
+        let mut rng = rand::thread_rng();
         loop {
-            let tmp = rng.gen_range(0..self.total_cards);
-            if tmp != self.current_flashcard_number {
-                self.current_flashcard_number = tmp;
+            let candidate = rng.gen_range(0..self.total_cards);
+            if candidate != self.current_flashcard_number {
+                self.set_current_flashcard(candidate);
                 break;
             }
         }
     }
-
     pub fn show_flash_card(&mut self) {
         self.set_state(State::ShowFlashcard);
     }
