@@ -301,6 +301,11 @@ fn show_next_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn show_prev_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+    //are we at the beginning, if so do nothing
+    //otherwise look at history
+    if app.history_size() == 0 {
+        return Ok(());
+    }
     show_flashcard(app, conn, Select::Prev)
 }
 

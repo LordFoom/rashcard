@@ -45,6 +45,7 @@ pub struct App<'a> {
     pub visual_flicker: bool,
     /// Record of flashcards that have been displayed
     pub flashcard_number_history: Vec<usize>,
+    pub flashcard_history_index: usize,
 }
 
 #[derive(clap::ValueEnum, Debug, Clone)]
@@ -84,9 +85,13 @@ impl App<'_> {
             },
             visual_flicker: false,
             flashcard_number_history: vec![],
+            flashcard_history_index: 0,
         }
     }
 
+    pub fn history_size(&self) -> usize {
+        self.flashcard_number_history.len()
+    }
     ///Sets up the app to show the saved popup
     ///This can and should be generalized
     pub fn display_saved_popup(&mut self) {
@@ -263,6 +268,7 @@ impl Default for App<'_> {
             draw_mode: FlashCardMode::Random,
             visual_flicker: false,
             flashcard_number_history: vec![],
+            flashcard_history_index: 0,
         }
     }
 }
