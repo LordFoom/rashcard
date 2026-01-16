@@ -315,6 +315,8 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
         app.first_shown = true;
     } else {
         match state {
+            // Select::Next => app.increment_flash_count(),
+            // Select::Prev => app.decrement_flash_count(),
             Select::Next => app.increment_flash_count(),
             Select::Prev => app.decrement_flash_count(),
             Select::Random => app.randomize_flash_count(),

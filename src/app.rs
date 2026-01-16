@@ -165,6 +165,25 @@ impl App<'_> {
         self.set_current_flashcard(next);
     }
 
+    ///Travel via our array of
+    pub fn go_back_in_history(&mut self) {
+        if self.flashcard_number_history.is_empty() {
+            self.current_flashcard_number = 0;
+            return;
+        };
+        //special case the zero
+        let history_idx = if self.flashcard_history_index == 0 {
+            0
+        } else {
+            self.flashcard_history_index - 1
+        };
+
+        if let Some(card_idx) = self.flashcard_number_history.get(history_idx) {
+            self.current_flashcard_number = card_idx.to_owned();
+            self.flashcard_history_index -= 1;
+        }
+    }
+
     pub fn decrement_flash_count(&mut self) {
         let next = if self.current_flashcard_number == 0 {
             self.total_cards - 1
