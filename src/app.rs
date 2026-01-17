@@ -184,6 +184,20 @@ impl App<'_> {
         }
     }
 
+    pub fn go_forward_in_history(&mut self) {
+        if self.flashcard_number_history.is_empty() {
+            self.current_flashcard_number = 0;
+            return;
+        };
+        //special case the last item
+        let history_idx = if self.flashcard_history_index == self.flashcard_number_history.len() - 1
+        {
+            self.flashcard_history_index
+        } else {
+            self.flashcard_history_index - 1
+        };
+    }
+
     pub fn decrement_flash_count(&mut self) {
         let next = if self.current_flashcard_number == 0 {
             self.total_cards - 1
