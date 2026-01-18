@@ -194,8 +194,12 @@ impl App<'_> {
         {
             self.flashcard_history_index
         } else {
-            self.flashcard_history_index - 1
+            self.flashcard_history_index + 1
         };
+        if let Some(card_idx) = self.flashcard_number_history.get(history_idx) {
+            self.current_flashcard_number = card_idx.to_owned();
+            self.flashcard_history_index += 1;
+        }
     }
 
     pub fn decrement_flash_count(&mut self) {
