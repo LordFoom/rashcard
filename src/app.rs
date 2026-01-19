@@ -192,7 +192,10 @@ impl App<'_> {
         //special case the last item
         let history_idx = if self.flashcard_history_index == self.flashcard_number_history.len() - 1
         {
-            self.flashcard_history_index
+            let last_index = self.flashcard_number_history.last().copied().unwrap_or(0);
+
+            self.set_current_flashcard(last_index + 1);
+            return;
         } else {
             self.flashcard_history_index + 1
         };
