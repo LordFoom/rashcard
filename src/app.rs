@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use log::debug;
 use rand::Rng;
 use ratatui::{
     style::{Color, Style},
@@ -161,26 +162,39 @@ impl App<'_> {
     }
 
     pub fn increment_flash_count(&mut self) {
-        let next = (self.current_flashcard_number + 1) % self.total_cards;
-        self.set_current_flashcard(next);
+        self.go_forward_in_history();
+        // let next = (self.current_flashcard_number + 1) % self.total_cards;
+        // self.set_current_flashcard(next);
     }
 
     ///Travel via our array of
     pub fn go_back_in_history(&mut self) {
+        debug!("Going back in history");
         if self.flashcard_number_history.is_empty() {
+            debug!("No history, returning 0");
             self.current_flashcard_number = 0;
             return;
         };
         //special case the zero
-        let history_idx = if self.flashcard_history_index == 0 {
+        let history_idx = if self.flashcard_history_index <= 0 {
             0
         } else {
             self.flashcard_history_index - 1
         };
 
         if let Some(card_idx) = self.flashcard_number_history.get(history_idx) {
+            debug!("Flash card index = {card_idx}");
+            debug!("Flash card history_idx {}", self.flashcard_history_index);
+            debug!(
+                "Flash card number history length: {}",
+                self.flashcard_number_history.len()
+            );
+            debug!("Flash card history value = {}", card_idx);
+
             self.current_flashcard_number = card_idx.to_owned();
-            self.flashcard_history_index -= 1;
+            if self.flashcard_history_index > 0 {
+                self.flashcard_history_index -= 1;
+            }
         }
     }
 
@@ -206,13 +220,14 @@ impl App<'_> {
     }
 
     pub fn decrement_flash_count(&mut self) {
-        let next = if self.current_flashcard_number == 0 {
-            self.total_cards - 1
-        } else {
-            self.current_flashcard_number - 1
-        };
-        // Or: (self.current_flashcard_number + self.total_cards - 1) % self.total_cards
-        self.set_current_flashcard(next);
+        self.go_back_in_history();
+        // let next = if self.current_flashcard_number == 0 {
+        //     self.total_cards - 1
+        // } else {
+        //     self.current_flashcard_number - 1
+        // };
+        //
+        // self.set_current_flashcard(next);
     }
 
     pub fn randomize_flash_count(&mut self) {
