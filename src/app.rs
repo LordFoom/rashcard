@@ -161,6 +161,11 @@ impl App<'_> {
         self.flashcard_log.push(index);
     }
 
+    fn set_flashcard_and_increment_index_count(&mut self, index: usize) {
+        self.set_current_flashcard(index);
+        self.flashcard_history_index += 1;
+    }
+
     pub fn increment_flash_count(&mut self) {
         //if we are at the end of the history vec, we want to keep going through the collection of
         //files,
@@ -260,7 +265,7 @@ impl App<'_> {
         loop {
             let candidate = rng.gen_range(0..self.total_cards);
             if candidate != self.current_flashcard_number {
-                self.set_current_flashcard(candidate);
+                self.set_flashcard_and_increment_index_count(candidate);
                 break;
             }
         }
