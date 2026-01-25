@@ -37,7 +37,10 @@ pub struct App<'a> {
     pub popup_time: Option<Instant>,
     pub current_flashcard_number: usize,
     pub current_flashcard_id: usize,
+    //TODO remove this?
     pub current_flash_text: String,
+    pub current_flash_title: String,
+    pub current_flash_body: String,
     pub total_cards: usize,
     pub first_shown: bool,
     pub cards_displayed: usize,
@@ -76,6 +79,8 @@ impl App<'_> {
             current_flashcard_number: 0,
             current_flashcard_id: 0,
             current_flash_text: String::new(),
+            current_flash_title: String::new(),
+            current_flash_body: String::new(),
             total_cards: 0,
             first_shown: false,
             cards_displayed: 0,
@@ -174,7 +179,8 @@ impl App<'_> {
 
     /// Returns true if we're at the end of history
     fn at_end_of_history(&self) -> bool {
-        self.flashcard_log.is_empty() || self.flashcard_history_index >= self.flashcard_log.len() - 1
+        self.flashcard_log.is_empty()
+            || self.flashcard_history_index >= self.flashcard_log.len() - 1
     }
 
     pub fn increment_flash_count(&mut self) {
@@ -300,6 +306,8 @@ impl Default for App<'_> {
             current_flashcard_number: 0,
             current_flashcard_id: 0,
             current_flash_text: String::new(),
+            current_flash_title: String::new(),
+            current_flash_body: String::new(),
             total_cards: 0,
             first_shown: false,
             cards_displayed: 0,
