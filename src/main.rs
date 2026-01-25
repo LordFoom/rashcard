@@ -313,10 +313,9 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     //get the next flashcard
     if !app.first_shown {
         app.first_shown = true;
+        app.record_first_card();
     } else {
         match state {
-            // Select::Next => app.increment_flash_count(),
-            // Select::Prev => app.decrement_flash_count(),
             Select::Next => app.increment_flash_count(),
             Select::Prev => app.decrement_flash_count(),
             Select::Random => app.randomize_flash_count(),

@@ -155,117 +155,74 @@ impl App<'_> {
             .content_length(100);
     }
 
-    /// Sets the current flashcard number and records it in history
-    fn set_current_flashcard(&mut self, index: usize) {
-        self.current_flashcard_number = index;
+    /// Push a card index to the log and move history index to the end
+    fn push_to_log(&mut self, index: usize) {
         self.flashcard_log.push(index);
+        self.flashcard_history_index = self.flashcard_log.len() - 1;
+        debug!(
+            "Pushed card {} to log, history_index now {}",
+            index, self.flashcard_history_index
+        );
     }
 
-    fn set_flashcard_and_increment_index_count(&mut self, index: usize) {
-        self.set_current_flashcard(index);
-        self.flashcard_history_index += 1;
+    /// Record the first card shown (called once when first_shown becomes true)
+    pub fn record_first_card(&mut self) {
+        if self.flashcard_log.is_empty() {
+            self.push_to_log(self.current_flashcard_number);
+        }
+    }
+
+    /// Returns true if we're at the end of history
+    fn at_end_of_history(&self) -> bool {
+        self.flashcard_log.is_empty() || self.flashcard_history_index >= self.flashcard_log.len() - 1
     }
 
     pub fn increment_flash_count(&mut self) {
-        //if we are at the end of the history vec, we want to keep going through the collection of
-        //files,
-        //so we see if flashcard_number_history.len == 0, if so we advance further through the
-        //collection, and we add the newly retrieved card to the history array, but we do not
-        //increase the index
-        if self.flashcard_log.is_empty() {
+        if self.at_end_of_history() {
+            // At end of history: calculate next sequential card and add to log
             let next = (self.current_flashcard_number + 1) % self.total_cards;
-            self.set_current_flashcard(next);
-            //we do not increment idx: now history_idx=0, first elem of log
-        }
-        //if the index is equal to the len-1 of the log, we add to the log and increase the index
-        //by 1
-        else if self.flashcard_history_index == self.flashcard_log.len() - 1 {
-            let next = (self.current_flashcard_number + 1) % self.total_cards;
-            self.set_current_flashcard(next);
-            //we keep track with the end of the log
-            self.flashcard_history_index += 1;
-        } else if self.flashcard_history_index < self.flashcard_log.len() - 1 {
-            // we are coming back through the log, we don't want to add to the log
+            self.current_flashcard_number = next;
+            self.push_to_log(next);
+        } else {
+            // In middle of history: move forward through existing log
             self.flashcard_history_index += 1;
             self.current_flashcard_number = self.flashcard_log[self.flashcard_history_index];
-        }
-        self.go_forward_in_history();
-        // let next = (self.current_flashcard_number + 1) % self.total_cards;
-        // self.set_current_flashcard(next);
-    }
-
-    ///Travel via our array of
-    pub fn go_back_in_history(&mut self) {
-        debug!("Going back in history");
-        if self.flashcard_log.is_empty() {
-            debug!("No history, returning 0");
-            self.current_flashcard_number = 0;
-            return;
-        };
-        //special case the zero
-        let history_idx = if self.flashcard_history_index <= 0 {
-            0
-        } else {
-            self.flashcard_history_index - 1
-        };
-
-        if let Some(card_idx) = self.flashcard_log.get(history_idx) {
-            debug!("Flash card index = {card_idx}");
-            debug!("Flash card history_idx {}", self.flashcard_history_index);
             debug!(
-                "Flash card number history length: {}",
-                self.flashcard_log.len()
+                "Moved forward in history to index {}, card {}",
+                self.flashcard_history_index, self.current_flashcard_number
             );
-            debug!("Flash card history value = {}", card_idx);
-
-            self.current_flashcard_number = card_idx.to_owned();
-            if self.flashcard_history_index > 0 {
-                self.flashcard_history_index -= 1;
-            }
-        }
-    }
-
-    pub fn go_forward_in_history(&mut self) {
-        if self.flashcard_log.is_empty() {
-            self.current_flashcard_number = 0;
-            return;
-        };
-        //special case the last item
-        let history_idx = if self.flashcard_history_index == self.flashcard_log.len() - 1 {
-            let last_index = self.flashcard_log.last().copied().unwrap_or(0);
-
-            self.set_current_flashcard(last_index + 1);
-            return;
-        } else {
-            self.flashcard_history_index + 1
-        };
-        if let Some(card_idx) = self.flashcard_log.get(history_idx) {
-            self.current_flashcard_number = card_idx.to_owned();
-            self.flashcard_history_index += 1;
         }
     }
 
     pub fn decrement_flash_count(&mut self) {
-        self.go_back_in_history();
-        // let next = if self.current_flashcard_number == 0 {
-        //     self.total_cards - 1
-        // } else {
-        //     self.current_flashcard_number - 1
-        // };
-        //
-        // self.set_current_flashcard(next);
+        debug!("Going back in history");
+        if self.flashcard_log.is_empty() {
+            debug!("No history");
+            return;
+        }
+        if self.flashcard_history_index > 0 {
+            self.flashcard_history_index -= 1;
+            self.current_flashcard_number = self.flashcard_log[self.flashcard_history_index];
+            debug!(
+                "Moved back to history index {}, card {}",
+                self.flashcard_history_index, self.current_flashcard_number
+            );
+        } else {
+            debug!("Already at beginning of history");
+        }
     }
 
     pub fn randomize_flash_count(&mut self) {
         if self.total_cards <= 1 {
-            return; // Nothing to randomize
+            return;
         }
 
         let mut rng = rand::thread_rng();
         loop {
             let candidate = rng.gen_range(0..self.total_cards);
             if candidate != self.current_flashcard_number {
-                self.set_flashcard_and_increment_index_count(candidate);
+                self.current_flashcard_number = candidate;
+                self.push_to_log(candidate);
                 break;
             }
         }
