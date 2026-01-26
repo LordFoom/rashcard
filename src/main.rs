@@ -325,23 +325,21 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
     let offset = app.current_flashcard_number;
     info!("Current flash number: {}", offset);
     info!("State: {:?}", state);
-    let txt = if let Some(flash) = db::next_flashcard(offset, conn)? {
-        let mut text = flash.title;
-        let body = flash.body;
-        text.push('\n');
-        text.push_str(&body);
+    if let Some(flash) = db::next_flashcard(offset, conn)? {
+        app.current_flash_title = flash.title.clone();
+        app.current_flash_body = flash.body.clone();
+        app.current_flash_text = format!("{}\n{}", app.current_flash_title, app.current_flash_body);
         app.current_flashcard_id = flash.id;
-        text
     } else {
         app.reset_count();
-        "No flashcards".to_owned()
+        app.current_flash_title = "No flashcards".to_string();
     };
 
     info!(
         "Our offset after changing the card: {}",
         app.current_flashcard_number
     );
-    app.update_flash_text(&txt);
+
     app.reset_scrollbar_state();
     app.increment_display_count();
     app.show_flash_card();
