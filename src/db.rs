@@ -6,6 +6,7 @@ use rusqlite::{params, Connection};
 pub struct FlashCard {
     pub title: String,
     pub body: String,
+    pub card_flipped: bool,
     //db id
     pub id: usize,
 }
@@ -60,6 +61,7 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
             id: row.get(0)?,
             title: row.get(1)?,
             body: row.get(2)?,
+            card_flipped: false,
         })
     })?;
 
