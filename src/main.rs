@@ -50,6 +50,8 @@ pub struct Args {
     ///Set display mode for timer: Forward, Backward, Random
     #[arg(short, long, requires("timer"), value_enum)]
     mode: Option<FlashCardMode>,
+    #[arg(short = 'l', long)]
+    flip_mode: bool,
 }
 
 fn init_logging(level: u8) -> Result<()> {
