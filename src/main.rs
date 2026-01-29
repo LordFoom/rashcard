@@ -50,6 +50,7 @@ pub struct Args {
     ///Set display mode for timer: Forward, Backward, Random
     #[arg(short, long, requires("timer"), value_enum)]
     mode: Option<FlashCardMode>,
+    ///if passed, will be "flip mode", showing title until space bar is pressed
     #[arg(short = 'l', long)]
     flip_mode: bool,
 }

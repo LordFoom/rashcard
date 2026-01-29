@@ -134,6 +134,12 @@ fn display_current_flashcard(frame: &mut Frame, rect: Rect, app: &mut App) {
     //we want a flicker if we eg copy
     let text = if app.visual_flicker {
         "  ".to_string()
+    } else if app.flip_mode {
+        if !app.card_flipped {
+            app.current_flash_title.clone()
+        } else {
+            app.current_flash_text.clone()
+        }
     } else {
         app.current_flash_text.clone()
     };
