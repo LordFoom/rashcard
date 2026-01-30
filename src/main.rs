@@ -234,7 +234,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         KeyCode::Char('y') | KeyCode::Char('Y') => {
                             copy_flashcard_to_clipboard(app)?
                         }
-                        // KeyCode
+                        KeyCode::Char(' ') => flip_flash_card(app)?,
                         _ => info!("Go baby go go!"),
                     }
                 }
@@ -258,6 +258,11 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
             _ => {}
         }
     }
+    Ok(())
+}
+
+fn flip_flash_card(app: &mut App) -> Result<()> {
+    app.card_flipped != !app.card_flipped;
     Ok(())
 }
 
