@@ -262,7 +262,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
 }
 
 fn flip_flash_card(app: &mut App) -> Result<()> {
-    app.card_flipped != !app.card_flipped;
+    app.card_flipped = !app.card_flipped;
     Ok(())
 }
 
