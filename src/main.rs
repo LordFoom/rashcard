@@ -35,7 +35,7 @@ mod ui;
     author = "foom",
     version = "1.1",
     about = "Flashcards in rust",
-    long_about = "Flashcard to make knowledge stick like rust to metal"
+    long_about = "Flashcard to make knowledge stick like rust to metal: stain your brain"
 )]
 pub struct Args {
     ///How much to spew to the file
@@ -53,6 +53,9 @@ pub struct Args {
     ///if passed, will be "flip mode", showing title until space bar is pressed
     #[arg(short = 'l', long)]
     flip_mode: bool,
+    ///Give info on number of
+    #[arg(short, long)]
+    report: bool,
 }
 
 fn init_logging(level: u8) -> Result<()> {
