@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{bail, Result};
 use log::info;
 use rusqlite::{params, Connection};
@@ -8,6 +10,12 @@ pub struct FlashCard {
     pub body: String,
     //db id
     pub id: usize,
+}
+
+///Titles are book titles
+///Number of quotes from each title
+pub struct CardTitleReport {
+    pub title_counts: HashMap<String, usize>,
 }
 
 pub fn default_connection() -> Result<Connection> {
