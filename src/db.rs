@@ -15,7 +15,24 @@ pub struct FlashCard {
 ///Titles are book titles
 ///Number of quotes from each title
 pub struct CardTitleReport {
-    pub title_counts: HashMap<String, usize>,
+    pub report_lines: Vec<ReportLine>,
+}
+
+pub struct ReportLine {
+    title: String,
+    title_count: usize,
+}
+
+impl CardTitleReport {
+    pub fn new() -> Self {
+        Self {
+            report_lines: Vec::new(),
+        }
+    }
+
+    pub fn add_line(&mut self, report_line: ReportLine) {
+        self.report_lines.push(report_line);
+    }
 }
 
 pub fn default_connection() -> Result<Connection> {
@@ -87,4 +104,17 @@ pub fn next_flashcard(offset: usize, conn: &Connection) -> Result<Option<FlashCa
 pub fn delete_flashcard(fc_id: usize, conn: &Connection) -> Result<()> {
     conn.execute("DELETE from flashcard where id = ?1", [&fc_id.to_string()])?;
     Ok(())
+}
+
+pub fn construct_title_report(conn: &Connection) -> Result<CardTitleReport> {
+    let mut qry = conn.prepare("SELECT title, COUNT(*) FROM flashcard GROUP BY title")?;
+    let mut report = CardTitleReport::new();
+    qry.query_map([], |row| {
+        report.add_line(ReportLine {
+            title: row.get(0)?,
+            title_count: row.get(1)?,
+        });
+        Ok(())
+    })?;
+    Ok(report)
 }
