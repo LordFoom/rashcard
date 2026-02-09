@@ -21,8 +21,11 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use tui_textarea::{Input, Key};
 
-use crate::app::{App, Timer};
 use crate::db::init_table;
+use crate::{
+    app::{App, Timer},
+    db::construct_title_report,
+};
 
 mod app;
 mod db;
@@ -98,6 +101,10 @@ fn main() -> Result<()> {
         import_yomu_quotes(&file, &conn)?;
         println!("Imported flashcards from {}", file);
         return Ok(());
+    }
+
+    if args.report {
+        let title_report = construct_title_report(&conn)?;
     }
     let mut maybe_timer = maybe_construct_timer(&args);
     let mut terminal = setup_terminal().context("setup failed")?;
