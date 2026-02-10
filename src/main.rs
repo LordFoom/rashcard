@@ -105,6 +105,8 @@ fn main() -> Result<()> {
 
     if args.report {
         let title_report = construct_title_report(&conn)?;
+        print_out_report(&title_report);
+        return Ok(());
     }
     let mut maybe_timer = maybe_construct_timer(&args);
     let mut terminal = setup_terminal().context("setup failed")?;
@@ -112,6 +114,10 @@ fn main() -> Result<()> {
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
     unsetup_terminal(&mut terminal).context("unsetup failed")
+}
+
+fn print_out_report(title_report: &db::CardTitleReport) -> Result<()> {
+    Ok(())
 }
 
 fn maybe_construct_timer(args: &Args) -> Option<Timer> {
