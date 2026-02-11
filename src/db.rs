@@ -19,8 +19,8 @@ pub struct CardTitleReport {
 }
 
 pub struct ReportLine {
-    title: String,
-    title_count: usize,
+    pub title: String,
+    pub title_count: usize,
 }
 
 impl CardTitleReport {
