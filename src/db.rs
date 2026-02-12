@@ -109,12 +109,14 @@ pub fn delete_flashcard(fc_id: usize, conn: &Connection) -> Result<()> {
 pub fn construct_title_report(conn: &Connection) -> Result<CardTitleReport> {
     let mut qry = conn.prepare("SELECT title, COUNT(*) FROM flashcard GROUP BY title")?;
     let mut report = CardTitleReport::new();
-    qry.query_map([], |row| {
-        report.add_line(ReportLine {
+    let rows = qry.query_map([], |row| {
+        Ok(ReportLine {
             title: row.get(0)?,
             title_count: row.get(1)?,
-        });
-        Ok(())
+        })
     })?;
+    for row in rows {
+        report.add_line(row?);
+    }
     Ok(report)
 }

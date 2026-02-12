@@ -105,7 +105,7 @@ fn main() -> Result<()> {
 
     if args.report {
         let title_report = construct_title_report(&conn)?;
-        print_out_report(&title_report);
+        print_out_report(&title_report)?;
         return Ok(());
     }
     let mut maybe_timer = maybe_construct_timer(&args);
@@ -118,6 +118,7 @@ fn main() -> Result<()> {
 
 fn print_out_report(title_report: &db::CardTitleReport) -> Result<()> {
     println!("{}", "Report on titles".red());
+    println!("{}", "=================".magenta());
     title_report.report_lines.iter().for_each(|line| {
         println!("{} -> {}", line.title, line.title_count);
     });
