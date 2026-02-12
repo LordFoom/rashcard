@@ -51,7 +51,6 @@ pub fn render_app(frame: &mut Frame, app: &mut App) {
             app.close_popup_if_it_is_time(500);
         }
         State::DisplayDeletePopup => draw_delete_popup(frame).unwrap(),
-        State::ProduceTitleReport => output_report(),
     }
 
     //down at the SIDE-BAR, SIDE-BAR, SIDE-BAR!!

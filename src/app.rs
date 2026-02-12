@@ -18,7 +18,6 @@ pub enum State {
     AddFlashcard,
     DisplaySavedPopup,
     DisplayDeletePopup,
-    ProduceTitleReport,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Select {
