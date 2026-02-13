@@ -30,6 +30,7 @@ use crate::{
 mod app;
 mod db;
 mod import;
+mod report;
 mod ui;
 
 ///Command line arguments for clap
@@ -105,7 +106,7 @@ fn main() -> Result<()> {
 
     if args.report {
         let title_report = construct_title_report(&conn)?;
-        print_out_report(&title_report)?;
+        report::print_out_report(&title_report)?;
         return Ok(());
     }
     let mut maybe_timer = maybe_construct_timer(&args);
@@ -114,15 +115,6 @@ fn main() -> Result<()> {
     // tracing::debug!()
     // let mut terminal = Terminal::new(CrosstermBackend::new(stdout()));
     unsetup_terminal(&mut terminal).context("unsetup failed")
-}
-
-fn print_out_report(title_report: &db::CardTitleReport) -> Result<()> {
-    println!("{}", "Report on titles".red());
-    println!("{}", "=================".magenta());
-    title_report.report_lines.iter().for_each(|line| {
-        println!("{} -> {}", line.title, line.title_count);
-    });
-    Ok(())
 }
 
 fn maybe_construct_timer(args: &Args) -> Option<Timer> {
