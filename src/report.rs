@@ -9,7 +9,7 @@ pub fn print_out_report(title_report: &db::CardTitleReport) -> Result<()> {
     title_report.report_lines.iter().for_each(|line| {
         println!(
             "{} -> {}",
-            line.title.cyan(),
+            line.title.trim().cyan(),
             line.title_count.to_string().purple()
         );
     });
