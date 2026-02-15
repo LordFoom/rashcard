@@ -57,9 +57,12 @@ pub struct Args {
     ///if passed, will be "flip mode", showing title until space bar is pressed
     #[arg(short = 'l', long)]
     flip_mode: bool,
-    ///Give info on number of
+    ///Give info on number of cards per title (currently titles are book titles).
+    ///Ordered by count, descending
     #[arg(short, long)]
     report: bool,
+    #[arg(long, requires = "report")]
+    reverse: bool,
 }
 
 fn init_logging(level: u8) -> Result<()> {
