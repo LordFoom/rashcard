@@ -10,7 +10,7 @@ pub fn print_out_report(title_report: &db::CardTitleReport) -> Result<()> {
         println!(
             "{} -> {}",
             line.title.trim().cyan(),
-            line.title_count.to_string().purple()
+            line.title_count.to_string().purple().bold()
         );
     });
     Ok(())
