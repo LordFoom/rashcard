@@ -106,9 +106,12 @@ pub fn delete_flashcard(fc_id: usize, conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-pub fn construct_title_report(conn: &Connection) -> Result<CardTitleReport> {
-    let mut qry = conn
-        .prepare("SELECT title, COUNT(*) FROM flashcard GROUP BY title ORDER BY count(*) desc")?;
+pub fn construct_title_report(conn: &Connection, reversed: bool) -> Result<CardTitleReport> {
+    let order = if reversed { "asc" } else { "desc" };
+    let sql =
+        format!("SELECT title, COUNT(*) FROM flashcard GROUP BY title ORDER BY count(*) {order}");
+    let mut qry = conn.prepare(&sql)?;
+
     let mut report = CardTitleReport::new();
     let rows = qry.query_map([], |row| {
         Ok(ReportLine {

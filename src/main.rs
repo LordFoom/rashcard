@@ -108,7 +108,7 @@ fn main() -> Result<()> {
     }
 
     if args.report {
-        let title_report = construct_title_report(&conn)?;
+        let title_report = construct_title_report(&conn, args.reverse)?;
         report::print_out_report(&title_report)?;
         return Ok(());
     }
