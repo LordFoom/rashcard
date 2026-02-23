@@ -65,6 +65,7 @@ pub fn extract_yomu_flashcards(title: &str, file_contents: String) -> Result<Vec
 ///Import a file into the flashcards using the ReadEra exported format
 ///Top line will be used as the title for flashcards, prefixed with a monotonically increasing
 ///number
+#[allow(dead_code)]
 pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
     let file_contents = std::fs::read_to_string(fp)?;
     //now we parse the file contents
@@ -76,6 +77,7 @@ pub fn import_read_era_quotes(fp: &str, conn: &Connection) -> Result<()> {
 }
 
 ///Take readera style exported notes and extract them as flashcard objects
+#[allow(dead_code)]
 fn extract_read_era_flash_cards(file_contents: String) -> Result<Vec<FlashCard>> {
     let mut title = String::new();
     let mut author = String::new();

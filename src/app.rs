@@ -110,10 +110,6 @@ impl App<'_> {
         self.popup_time = Some(now);
     }
 
-    pub fn display_confirm_delete_popup(&mut self) {
-        self.set_state(State::DisplayDeletePopup);
-    }
-
     pub fn close_popup_if_it_is_time(&mut self, time: u128) {
         if let Some(inst) = self.popup_time {
             let time_since = inst.elapsed();
