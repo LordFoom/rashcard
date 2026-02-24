@@ -244,9 +244,7 @@ fn read_input(app: &mut App, conn: &Connection) -> Result<()> {
                         KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up | KeyCode::PageUp => {
                             app.scroll_up()
                         }
-                        KeyCode::Char('d') | KeyCode::Char('D') => {
-                            maybe_delete_flashcard(app, conn)?
-                        }
+                        KeyCode::Char('d') | KeyCode::Char('D') => maybe_delete_flashcard(app)?,
                         KeyCode::Char('y') | KeyCode::Char('Y') => {
                             copy_flashcard_to_clipboard(app)?
                         }
@@ -371,7 +369,7 @@ fn show_flashcard(app: &mut App, conn: &Connection, state: Select) -> Result<()>
 }
 
 ///This will cause a "Really delete" modal to display
-fn maybe_delete_flashcard(app: &mut App, conn: &Connection) -> Result<()> {
+fn maybe_delete_flashcard(app: &mut App) -> Result<()> {
     info!("Maybe deleting a flashcard!");
     if app.has_flashcards() {
         //show the confirm delete dialog

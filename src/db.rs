@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use anyhow::{bail, Result};
 use log::info;
 use rusqlite::{params, Connection};
